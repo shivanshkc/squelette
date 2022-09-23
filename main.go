@@ -5,12 +5,10 @@ import (
 	"net/http"
 	"time"
 
-
-	"github.com/shivanshkc/template-microservice-go/src/middlewares"
-	"github.com/shivanshkc/template-microservice-go/src/utils/httputils"
-
 	"github.com/shivanshkc/template-microservice-go/src/configs"
 	"github.com/shivanshkc/template-microservice-go/src/logger"
+	"github.com/shivanshkc/template-microservice-go/src/middlewares"
+	"github.com/shivanshkc/template-microservice-go/src/utils/httputils"
 
 	"github.com/gorilla/mux"
 )
