@@ -1,0 +1,6 @@
+---
+application:
+  name: template-microservice-go
+
+http_server:
+  addr: 0.0.0.0:8080
