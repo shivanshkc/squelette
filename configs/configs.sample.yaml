@@ -1,0 +1,10 @@
+---
+application:
+  name: template-microservice-go
+
+http_server:
+  addr: localhost:8080
+
+logger:
+  level: trace
+  pretty: true
