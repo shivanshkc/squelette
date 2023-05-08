@@ -1,4 +1,4 @@
-package configs
+package config
 
 import (
 	"fmt"
@@ -12,12 +12,12 @@ const (
 	configType = "yaml"
 )
 
-// configsPaths is the list of locations that will be searched for the configs file.
-var configPaths = []string{"/etc/template-microservice-go/"}
+// configPaths is the list of locations that will be searched for the configs file.
+var configPaths = []string{"/etc/kevlar/", "./configs/"}
 
-// withViper loads the configs using spf13/viper.
+// loadWithViper loads the configs using spf13/viper.
 // Panic is allowed here because configs are crucial to the application.
-func withViper() *Model {
+func loadWithViper() *Config {
 	// Specifying the configs file name and type to viper.
 	viper.SetConfigName(configName)
 	viper.SetConfigType(configType)
@@ -32,10 +32,7 @@ func withViper() *Model {
 		panic(fmt.Errorf("error in ReadInConfig: %w", err))
 	}
 
-	// Using up the environment variables.
-	viper.AutomaticEnv()
-
-	model := &Model{}
+	model := &Config{}
 	// Unmarshalling into the model instance.
 	if err := viper.Unmarshal(model, func(c *mapstructure.DecoderConfig) { c.TagName = configType }); err != nil {
 		panic(fmt.Errorf("error in Unmarshal: %w", err))

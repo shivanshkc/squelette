@@ -1,5 +1,5 @@
 #------------------------------------------------------------------
-FROM golang:1.17-alpine as builder
+FROM golang:1.19-alpine as builder
 
 # Update alpine.
 RUN apk update && apk upgrade
@@ -14,12 +14,9 @@ WORKDIR /service
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy and test code.
+# Copy and build code.
 COPY . .
-RUN make test
-
-# Build application binary.
-RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o bin/main
+RUN make build
 
 #-------------------------------------------------------------------
 FROM alpine:3
@@ -31,6 +28,6 @@ WORKDIR /service
 COPY --from=builder /service/bin /service/
 
 # Run the web service on container startup.
-CMD ["/service/main"]
+CMD ["/service/kevlar"]
 
 #-------------------------------------------------------------------

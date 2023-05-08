@@ -2,19 +2,16 @@ SHELL=/usr/bin/env bash
 
 # Project specific properties.
 application_name        = template-microservice-go
-application_binary_name = main
+application_binary_name = template-microservice-go
 
-# Docker specific properties.
+# Container specific properties.
 application_image_name     = template-microservice-go
 application_container_name = template-microservice-go-1
-
-# For ProtoBuf code generation.
-proto_path=src/proto/*.proto
 
 # Builds the project.
 build:
 	@echo "+$@"
-	@go build -o bin/$(application_binary_name)
+	@go build -o bin/$(application_binary_name) cmd/$(application_name)/main.go
 
 # Runs the project after linting and building it anew.
 run: tidy lint build
@@ -23,7 +20,7 @@ run: tidy lint build
 	@bin/$(application_binary_name)
 
 # Runs the project.
-run-only:
+run-quick:
 	@echo "+$@"
 	@echo "########### Running the application binary ############"
 	@bin/$(application_binary_name)
@@ -41,12 +38,12 @@ tidy:
 # Runs golang-ci-lint over the project.
 lint:
 	@echo "+$@"
-	@golangci-lint run
+	@golangci-lint run ./...
 
 # Builds the docker image for the project.
 image:
 	@echo "+$@"
-	@docker build --tag $(application_image_name):latest .
+	@docker build --network host --file Containerfile --tag $(application_image_name):latest .
 
 # Runs the project container assuming the image is already built.
 container:
@@ -56,15 +53,5 @@ container:
 
 	@echo "################ Running new container ################"
 	@docker run --name $(application_container_name) --detach --net host --restart unless-stopped \
-		--volume /etc/$(application_name)/configs.yaml:/etc/$(application_name)/configs.yaml \
+		--volume $(PWD)/configs/configs.yaml:/etc/$(application_name)/configs.yaml \
 		$(application_image_name):latest
-
-# Generates code using the found protocol buffer files.
-proto:
-	@echo "+$@"
-	@protoc \
-		--go_out=. \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=. \
-		--go-grpc_opt=paths=source_relative \
-		$(proto_path)

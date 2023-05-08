@@ -2,9 +2,9 @@ package errutils
 
 // HTTPError is a custom error type that implements the error interface.
 type HTTPError struct {
-	Status int    `json:"-"`
-	Code   string `json:"code"`
-	Reason string `json:"reason"`
+	StatusCode int    `json:"-"`
+	Status     string `json:"status"`
+	Reason     string `json:"reason"`
 }
 
 // Error provides the reason behind the error, which is usually human-readable.
@@ -14,7 +14,7 @@ func (h *HTTPError) Error() string {
 		return h.Reason
 	}
 	// Returning code if reason is empty.
-	return h.Code
+	return h.Status
 }
 
 // WithReasonStr is a chainable method to set the reason of the HTTPError.
@@ -38,6 +38,8 @@ func ToHTTPError(err interface{}) *HTTPError {
 	switch asserted := err.(type) {
 	case *HTTPError:
 		return asserted
+	case HTTPError:
+		return &asserted
 	case error:
 		return InternalServerError().WithReasonErr(asserted)
 	case string:

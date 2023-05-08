@@ -5,8 +5,8 @@ bin
 .idea
 .vscode
 
-# Secrets
-keys
+# Configs
+configs/configs.yaml
 
 # Logs
 logs

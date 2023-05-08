@@ -11,9 +11,6 @@ docs
 # CI/CD files.
 .github
 
-# Configuration files.
-configs.yaml
-
 # IDE Metadata
 .idea
 .vscode
