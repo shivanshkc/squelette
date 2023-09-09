@@ -19,12 +19,6 @@ run: tidy lint build
 	@echo "########### Running the application binary ############"
 	@bin/$(application_binary_name)
 
-# Runs the project.
-run-quick:
-	@echo "+$@"
-	@echo "########### Running the application binary ############"
-	@bin/$(application_binary_name)
-
 # Tests the whole project.
 test:
 	@echo "+$@"

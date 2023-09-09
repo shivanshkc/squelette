@@ -27,6 +27,7 @@ linters:
   # Following linters are disabled.
   disable:
     - deadcode
+    - depguard
     - exhaustivestruct
     - exhaustruct
     - gochecknoglobals

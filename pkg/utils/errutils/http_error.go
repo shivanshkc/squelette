@@ -1,5 +1,12 @@
 package errutils
 
+import (
+	"errors"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+)
+
 // HTTPError is a custom error type that implements the error interface.
 type HTTPError struct {
 	StatusCode int    `json:"-"`
@@ -38,13 +45,40 @@ func ToHTTPError(err interface{}) *HTTPError {
 	switch asserted := err.(type) {
 	case *HTTPError:
 		return asserted
-	case HTTPError:
-		return &asserted
+	case *echo.HTTPError:
+		return &HTTPError{
+			StatusCode: asserted.Code,
+			Status:     http.StatusText(asserted.Code),
+			Reason:     asserted.Error(),
+		}
 	case error:
+		if errHTTP := findErrorType[*HTTPError](asserted); errHTTP != nil {
+			return errHTTP.WithReasonErr(asserted)
+		}
+		if errEcho := findErrorType[*echo.HTTPError](asserted); errEcho != nil {
+			return ToHTTPError(errEcho).WithReasonStr(asserted.Error())
+		}
 		return InternalServerError().WithReasonErr(asserted)
 	case string:
 		return InternalServerError().WithReasonStr(asserted)
 	default:
 		return InternalServerError()
+	}
+}
+
+// findErrorType finds the T type in the wrap chain of the given error.
+//
+//nolint:errorlint // errors.As will not work here.
+func findErrorType[T any](err error) T {
+	switch asserted := err.(type) {
+	case T:
+		return asserted
+	default:
+		unwrapped := errors.Unwrap(err)
+		if unwrapped == nil {
+			var nilValue T
+			return nilValue
+		}
+		return findErrorType[T](unwrapped)
 	}
 }

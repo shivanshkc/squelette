@@ -33,19 +33,7 @@ func (s *Server) Start() {
 	s.echoInstance.HideBanner = true            // No banner.
 	s.echoInstance.Logger.SetOutput(io.Discard) // No internal logging.
 	// Add a custom HTTP error handler to the echo instance.
-	s.echoInstance.HTTPErrorHandler = func(err error, eCtx echo.Context) {
-		var errHTTP *errutils.HTTPError
-
-		// Determine the type of error by checking with echo's builtin errors.
-		if errors.Is(err, echo.ErrNotFound) {
-			errHTTP = errutils.NotFound().WithReasonErr(err)
-		} else {
-			errHTTP = errutils.ToHTTPError(err)
-		}
-
-		_ = eCtx.JSON(errHTTP.StatusCode, errHTTP)
-	}
-
+	s.echoInstance.HTTPErrorHandler = s.errorHandler
 	// Register the REST methods.
 	s.registerRoutes()
 
@@ -91,4 +79,23 @@ func (s *Server) registerRoutes() {
 	})
 
 	// More methods can be defined here.
+}
+
+// errorHandler handles all echo HTTP errors.
+func (s *Server) errorHandler(err error, eCtx echo.Context) {
+	// Convert to HTTP error to send back the response.
+	errHTTP := errutils.ToHTTPError(err)
+
+	// Log HTTP errors.
+	switch errHTTP.StatusCode / 100 {
+	case 4: //nolint:gomnd // Represents 4xx behaviour.
+		s.Logger.Info().Any("error", errHTTP).Msg("invalid request")
+	case 5: //nolint:gomnd // Represents 5xx behaviour.
+		s.Logger.Error().Any("error", errHTTP).Msg("server error")
+	default:
+		s.Logger.Error().Any("error", errHTTP).Msg("unknown error")
+	}
+
+	// Response.
+	_ = eCtx.JSON(errHTTP.StatusCode, errHTTP)
 }
