@@ -1,1 +1,1 @@
-# Go Microservice Template
+# Squelette

@@ -13,10 +13,10 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/shivanshkc/template-microservice-go/pkg/config"
-	"github.com/shivanshkc/template-microservice-go/pkg/logger"
-	"github.com/shivanshkc/template-microservice-go/pkg/utils/errutils"
-	"github.com/shivanshkc/template-microservice-go/pkg/utils/signals"
+	"github.com/shivanshkc/squelette/pkg/config"
+	"github.com/shivanshkc/squelette/pkg/logger"
+	"github.com/shivanshkc/squelette/pkg/utils/errutils"
+	"github.com/shivanshkc/squelette/pkg/utils/signals"
 )
 
 // Server is the HTTP server of this application.

@@ -1,4 +1,4 @@
-module github.com/shivanshkc/template-microservice-go
+module github.com/shivanshkc/squelette
 
 go 1.19
 

@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/shivanshkc/template-microservice-go/pkg/logger"
+	"github.com/shivanshkc/squelette/pkg/logger"
 )
 
 // Middleware implements all the REST middleware methods.

@@ -11,9 +11,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/shivanshkc/template-microservice-go/pkg/config"
-	"github.com/shivanshkc/template-microservice-go/pkg/logger"
-	"github.com/shivanshkc/template-microservice-go/pkg/utils/errutils"
+	"github.com/shivanshkc/squelette/pkg/config"
+	"github.com/shivanshkc/squelette/pkg/logger"
+	"github.com/shivanshkc/squelette/pkg/utils/errutils"
 )
 
 func TestMiddleware_Recovery(t *testing.T) {

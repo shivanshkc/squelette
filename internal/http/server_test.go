@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/shivanshkc/template-microservice-go/pkg/config"
-	"github.com/shivanshkc/template-microservice-go/pkg/logger"
+	"github.com/shivanshkc/squelette/pkg/config"
+	"github.com/shivanshkc/squelette/pkg/logger"
 )
 
 // TestServer_Start checks if the HTTP server starts correctly with all the valid parameters.

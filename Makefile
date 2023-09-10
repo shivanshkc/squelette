@@ -1,13 +1,13 @@
 SHELL=/usr/bin/env bash
 
 # Project specific properties.
-application_name        = template-microservice-go
-application_binary_name = template-microservice-go
+application_name        = squelette
+application_binary_name = squelette
 application_addr        = http://localhost:8080
 
 # Container specific properties.
-application_image_name     = template-microservice-go
-application_container_name = template-microservice-go-1
+application_image_name     = squelette
+application_container_name = squelette-1
 
 
 # Builds the project.
