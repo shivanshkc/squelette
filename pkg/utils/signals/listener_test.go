@@ -17,7 +17,7 @@ func TestOnSignal(t *testing.T) {
 
 	// Add actions. Their invocations will be verified.
 	for i := 0; i < actionCount; i++ {
-		OnSignal(func(signal os.Signal) {
+		OnSignal(func(_ os.Signal) {
 			actionChan <- struct{}{}
 		})
 	}
