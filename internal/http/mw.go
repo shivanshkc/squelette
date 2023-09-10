@@ -21,7 +21,7 @@ func (m *Middleware) Recovery(next echo.HandlerFunc) echo.HandlerFunc {
 		DisablePrintStack: false,
 		// This allows the usage of our custom logger.
 		LogErrorFunc: func(c echo.Context, err error, stack []byte) error {
-			log := m.Logger.ForContext(c.Request().Context())
+			log := m.Logger.WithContext(c.Request().Context())
 			log.Error().Err(err).Bytes("stack", stack).Msg("")
 			return err
 		},

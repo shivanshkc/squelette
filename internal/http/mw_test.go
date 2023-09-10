@@ -45,7 +45,7 @@ func TestMiddleware_Recovery(t *testing.T) {
 	}
 
 	// Decode the response body for verification.
-	responseBody := map[string]interface{}{}
+	responseBody := map[string]any{}
 	if err := json.NewDecoder(recorder.Body).Decode(&responseBody); err != nil {
 		t.Errorf("failed to decode response body: %v", err)
 		return

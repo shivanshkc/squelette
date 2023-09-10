@@ -1,6 +1,7 @@
 ---
 application:
   name: template-microservice-go
+  pprof: true
 
 http_server:
   addr: localhost:8080

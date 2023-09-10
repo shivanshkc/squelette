@@ -41,7 +41,7 @@ func (h *HTTPError) WithReasonErr(reason error) *HTTPError {
 }
 
 // ToHTTPError converts any value to an appropriate HTTPError.
-func ToHTTPError(err interface{}) *HTTPError {
+func ToHTTPError(err any) *HTTPError {
 	switch asserted := err.(type) {
 	case *HTTPError:
 		return asserted

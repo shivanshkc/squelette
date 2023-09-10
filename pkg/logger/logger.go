@@ -19,9 +19,9 @@ type Logger struct {
 	Config *config.Config
 }
 
-// ForContext creates a new logger with this logger as the base.
+// WithContext creates a new logger with this logger as the base.
 // The new logger by default logs the request metadata present in the given context.
-func (l *Logger) ForContext(ctx context.Context) *Logger {
+func (l *Logger) WithContext(ctx context.Context) *Logger {
 	// Get the loggable data out of the context.
 	ctxInfo := ctxutils.GetRequestCtxInfo(ctx)
 	if ctxInfo == nil {
@@ -30,8 +30,8 @@ func (l *Logger) ForContext(ctx context.Context) *Logger {
 
 	// Add the required fields to the subLogger.
 	subLogger := l.With().
-		Str("request_id", ctxInfo.RequestID).
 		Str("trace_id", ctxInfo.TraceID).
+		Str("request_id", ctxInfo.RequestID).
 		// More fields can be added here.
 		Logger()
 
