@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/shivanshkc/template-microservice-go/internal/http"
-	"github.com/shivanshkc/template-microservice-go/pkg/config"
-	"github.com/shivanshkc/template-microservice-go/pkg/logger"
+	"github.com/shivanshkc/squelette/internal/http"
+	"github.com/shivanshkc/squelette/pkg/config"
+	"github.com/shivanshkc/squelette/pkg/logger"
 )
 
 func main() {

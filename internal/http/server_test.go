@@ -8,15 +8,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/shivanshkc/template-microservice-go/pkg/config"
-	"github.com/shivanshkc/template-microservice-go/pkg/logger"
+	"github.com/shivanshkc/squelette/pkg/config"
+	"github.com/shivanshkc/squelette/pkg/logger"
 )
 
 // TestServer_Start checks if the HTTP server starts correctly with all the valid parameters.
 func TestServer_Start(t *testing.T) {
 	// Start the server with mock dependencies.
 	server := mockServerStart()
-	defer func() { _ = server.echoInstance.Close() }()
+	defer func() { _ = server.echoInst.Close() }()
 
 	// Server dependencies.
 	cfg := config.LoadMock()
@@ -46,7 +46,7 @@ func TestServer_Start(t *testing.T) {
 func TestServer_Start_Interruption(t *testing.T) {
 	// Start the server with mock dependencies.
 	server := mockServerStart()
-	defer func() { _ = server.echoInstance.Close() }()
+	defer func() { _ = server.echoInst.Close() }()
 
 	// Send a SIGINT manually.
 	if err := syscall.Kill(syscall.Getpid(), syscall.SIGINT); err != nil {

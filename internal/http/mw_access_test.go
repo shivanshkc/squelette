@@ -9,7 +9,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/shivanshkc/template-microservice-go/pkg/utils/ctxutils"
+	"github.com/shivanshkc/squelette/pkg/utils/ctxutils"
 )
 
 //nolint:funlen // This function may get shorter when we write more tests in the future that demand re-usability.

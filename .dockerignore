@@ -15,8 +15,8 @@ docs
 .idea
 .vscode
 
-# Secrets
-keys
+# Configs
+configs
 
 # Logs
 logs

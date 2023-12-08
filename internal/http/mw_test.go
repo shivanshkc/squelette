@@ -11,9 +11,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/shivanshkc/template-microservice-go/pkg/config"
-	"github.com/shivanshkc/template-microservice-go/pkg/logger"
-	"github.com/shivanshkc/template-microservice-go/pkg/utils/errutils"
+	"github.com/shivanshkc/squelette/pkg/config"
+	"github.com/shivanshkc/squelette/pkg/logger"
+	"github.com/shivanshkc/squelette/pkg/utils/errutils"
 )
 
 func TestMiddleware_Recovery(t *testing.T) {
@@ -45,7 +45,7 @@ func TestMiddleware_Recovery(t *testing.T) {
 	}
 
 	// Decode the response body for verification.
-	responseBody := map[string]interface{}{}
+	responseBody := map[string]any{}
 	if err := json.NewDecoder(recorder.Body).Decode(&responseBody); err != nil {
 		t.Errorf("failed to decode response body: %v", err)
 		return

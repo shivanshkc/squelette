@@ -6,7 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/shivanshkc/template-microservice-go/pkg/utils/ctxutils"
+	"github.com/shivanshkc/squelette/pkg/utils/ctxutils"
 )
 
 // AccessLogger middleware handles access logging.
@@ -20,7 +20,7 @@ func (m *Middleware) AccessLogger(next echo.HandlerFunc) echo.HandlerFunc {
 		// Setup the request's context.
 		ctxutils.SetRequestCtxInfo(req)
 		// Fetch the logger for the updated request context.
-		log := m.Logger.ForContext(req.Context())
+		log := m.Logger.WithContext(req.Context())
 
 		// Embedding the writer into the custom-writer to persist status-code for logging.
 		cWriter := &responseWriterWithCode{ResponseWriter: eCtx.Response()}

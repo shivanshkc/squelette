@@ -13,7 +13,7 @@ const (
 )
 
 // configPaths is the list of locations that will be searched for the configs file.
-var configPaths = []string{"/etc/kevlar/", "./configs/"}
+var configPaths = []string{"/etc/squelette/", "./configs/"}
 
 // loadWithViper loads the configs using spf13/viper.
 // Panic is allowed here because configs are crucial to the application.

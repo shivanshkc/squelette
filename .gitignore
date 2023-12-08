@@ -8,6 +8,9 @@ bin
 # Configs
 configs/configs.yaml
 
+# Profiling data
+pprof
+
 # Logs
 logs
 .logs
