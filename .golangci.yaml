@@ -31,7 +31,6 @@ linters:
     - exhaustivestruct
     - exhaustruct
     - gochecknoglobals
-    - godox
     - golint
     - ifshort
     - interfacer
