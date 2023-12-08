@@ -28,6 +28,6 @@ WORKDIR /service
 COPY --from=builder /service/bin /service/
 
 # Run the web service on container startup.
-CMD ["/service/kevlar"]
+CMD ["/service/squelette"]
 
 #-------------------------------------------------------------------
