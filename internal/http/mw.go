@@ -8,15 +8,18 @@ import (
 	"github.com/shivanshkc/squelette/pkg/utils/httputils"
 )
 
+// hFunc is an alias for hFunc.
+type hFunc = http.HandlerFunc
+
 // Middleware implements all the REST middleware methods.
 type Middleware struct{}
 
-func (m *Middleware) Recovery(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (m *Middleware) Recovery(next http.Handler) http.Handler {
+	return hFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer recoverer(w, r)
 		// Next middleware or handler.
 		next.ServeHTTP(w, r)
-	}
+	})
 }
 
 // recoverer is supposed to be called with a defer statement to recover a panic.
@@ -39,8 +42,8 @@ func recoverer(w http.ResponseWriter, r *http.Request) {
 }
 
 // CORS middlewares handled the CORS issues.
-func (m *Middleware) CORS(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (m *Middleware) CORS(next http.Handler) http.Handler {
+	return hFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "*")
@@ -51,6 +54,6 @@ func (m *Middleware) CORS(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		next(w, r)
-	}
+		next.ServeHTTP(w, r)
+	})
 }

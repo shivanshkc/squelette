@@ -27,12 +27,12 @@ func TestAccessLogger(t *testing.T) {
 	req, res := httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder()
 
 	// Create an instance of access-logger middleware that passes control to a mock handler.
-	accessLoggerMW := mockMW.AccessLogger(func(w http.ResponseWriter, r *http.Request) {
+	accessLoggerMW := mockMW.AccessLogger(hFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(expectedResponseStatus)
-	})
+	}))
 
 	// Expect no error.
-	accessLoggerMW(res, req)
+	accessLoggerMW.ServeHTTP(res, req)
 
 	// Fetch context-info to verify if it was set correctly by the middleware.
 	ctxInfo := logger.GetContextValues(req.Context())

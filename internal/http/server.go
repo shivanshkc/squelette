@@ -10,6 +10,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/gorilla/mux"
+
 	"github.com/shivanshkc/squelette/pkg/config"
 	"github.com/shivanshkc/squelette/pkg/utils/httputils"
 	"github.com/shivanshkc/squelette/pkg/utils/signals"
@@ -24,16 +26,11 @@ type Server struct {
 
 // Start sets up all the dependencies and routes on the server, and calls ListenAndServe on it.
 func (s *Server) Start() {
-	// All routes will be attached to this multiplexer.
-	mux := http.NewServeMux()
-	// Register the REST methods.
-	s.registerRoutes(mux)
-
 	// Create the HTTP server.
 	s.httpServer = &http.Server{
 		Addr:              s.Config.HTTPServer.Addr,
 		ReadHeaderTimeout: time.Minute,
-		Handler:           mux,
+		Handler:           s.getHandler(),
 	}
 
 	// Gracefully shut down upon interruption.
@@ -54,13 +51,17 @@ func (s *Server) Start() {
 }
 
 // registerRoutes attaches middleware and REST methods to the server.
-func (s *Server) registerRoutes(mux *http.ServeMux) {
-	// The child mux will allow us to add global middlewares to all routes together.
-	childMux := http.NewServeMux()
+func (s *Server) getHandler() http.Handler {
+	router := mux.NewRouter()
+
+	// Attach middleware.
+	router.Use(s.Middleware.Recovery)
+	router.Use(s.Middleware.CORS)
+	router.Use(s.Middleware.AccessLogger)
 
 	// Sample REST method.
-	childMux.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
-		slog.InfoContext(r.Context(), "example log")
+	router.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
+		slog.InfoContext(r.Context(), "hello world")
 		httputils.Write(w, http.StatusOK, nil, map[string]any{"code": "OK"})
 	})
 
@@ -68,28 +69,26 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 
 	// Enable profiling if configured.
 	if s.Config.Application.PProf {
-		s.enableProfiling(childMux)
+		router.Handle("/", s.getProfilingHandler())
 	}
 
-	// Attach global middleware.
-	mux.Handle("/", s.Middleware.Recovery(s.Middleware.CORS(s.Middleware.AccessLogger(
-		childMux.ServeHTTP,
-	))))
+	return router
 }
 
-// enableProfiling enables profiling and registers pprof REST endpoints.
-func (s *Server) enableProfiling(mux *http.ServeMux) {
+// getProfilingHandler returns the handler that serves profiling data.
+func (s *Server) getProfilingHandler() http.Handler {
 	// Enable block profiling.
 	runtime.SetBlockProfileRate(1)
 	// Enable mutex profiling.
 	runtime.SetMutexProfileFraction(1)
 
-	// Create and setup the multiplexer.
-	mux.HandleFunc("/debug/pprof/", pprof.Index)
-	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	router := mux.NewRouter()
+	router.HandleFunc("/debug/pprof/", pprof.Index)
+	router.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	router.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	router.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	router.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
 	slog.Info("pprof endpoints available at: /debug/pprof")
+	return router
 }

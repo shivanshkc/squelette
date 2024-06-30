@@ -11,8 +11,8 @@ import (
 )
 
 // AccessLogger middleware handles access logging.
-func (m *Middleware) AccessLogger(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (m *Middleware) AccessLogger(next http.Handler) http.Handler {
+	return hFunc(func(w http.ResponseWriter, r *http.Request) {
 		// This will be used to calculate the total request execution time.
 		start := time.Now()
 
@@ -21,15 +21,16 @@ func (m *Middleware) AccessLogger(next http.HandlerFunc) http.HandlerFunc {
 		*r = *r.WithContext(newCtx)
 
 		// Embedding the writer into the custom-writer to persist status-code for logging.
-		w = &responseWriterWithCode{ResponseWriter: w}
+		cw := &responseWriterWithCode{ResponseWriter: w}
 
 		// Request entry log.
 		slog.InfoContext(r.Context(), "request received", "url", r.URL.String())
 		// Release control to the next middleware or handler.
-		next(w, r)
+		next.ServeHTTP(cw, r)
 		// Request exit log.
-		slog.InfoContext(r.Context(), "request completed", "latency", time.Since(start))
-	}
+		slog.InfoContext(r.Context(), "request completed",
+			"latency", time.Since(start), "status", cw.statusCode)
+	})
 }
 
 // responseWriterWithCode is a wrapper for http.ResponseWriter for persisting statusCode.

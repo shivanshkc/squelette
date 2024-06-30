@@ -4,6 +4,7 @@ go 1.22
 
 require (
 	github.com/google/uuid v1.3.0
+	github.com/gorilla/mux v1.8.1
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/spf13/viper v1.15.0
 
