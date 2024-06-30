@@ -27,7 +27,7 @@ func recoverer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slog.ErrorContext(r.Context(), "panic occurred during request execution: %v", errAny)
+	slog.ErrorContext(r.Context(), "panic occurred during request execution", "err", errAny)
 	// Convert to error for handling.
 	err, ok := errAny.(error)
 	if !ok {
