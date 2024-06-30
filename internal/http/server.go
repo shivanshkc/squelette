@@ -13,6 +13,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/shivanshkc/squelette/pkg/config"
+	"github.com/shivanshkc/squelette/pkg/utils/errutils"
 	"github.com/shivanshkc/squelette/pkg/utils/httputils"
 	"github.com/shivanshkc/squelette/pkg/utils/signals"
 )
@@ -63,7 +64,7 @@ func (s *Server) getHandler() http.Handler {
 	router.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		slog.InfoContext(r.Context(), "hello world")
 		httputils.Write(w, http.StatusOK, nil, map[string]any{"code": "OK"})
-	})
+	}).Methods(http.MethodGet)
 
 	// More API routes here...
 
@@ -71,6 +72,11 @@ func (s *Server) getHandler() http.Handler {
 	if s.Config.Application.PProf {
 		s.addProfilingRoutes(router)
 	}
+
+	// Handle 404.
+	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		httputils.WriteErr(w, errutils.NotFound())
+	})
 
 	return router
 }
