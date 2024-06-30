@@ -1,44 +1,56 @@
 package http
 
 import (
+	"fmt"
 	"log/slog"
+	"net/http"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/shivanshkc/squelette/pkg/utils/httputils"
 )
 
 // Middleware implements all the REST middleware methods.
 type Middleware struct{}
 
-// Recovery is a panic recovery middleware.
-func (m *Middleware) Recovery(next echo.HandlerFunc) echo.HandlerFunc {
-	return middleware.RecoverWithConfig(middleware.RecoverConfig{
-		Skipper:           func(c echo.Context) bool { return false },
-		StackSize:         middleware.DefaultRecoverConfig.StackSize,
-		DisableStackAll:   false,
-		DisablePrintStack: false,
-		// This allows the usage of our custom logger.
-		LogErrorFunc: func(c echo.Context, err error, stack []byte) error {
-			slog.ErrorContext(c.Request().Context(), "", "stack", stack)
-			return err
-		},
-	})(next)
+func (m *Middleware) Recovery(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer recoverer(w, r)
+		// Next middleware or handler.
+		next.ServeHTTP(w, r)
+	}
 }
 
-// CORS is a Cross-Origin Resource Sharing (CORS) middleware.
-func (m *Middleware) CORS(next echo.HandlerFunc) echo.HandlerFunc {
-	return middleware.CORSWithConfig(middleware.CORSConfig{
-		Skipper:          func(c echo.Context) bool { return false },
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"*"},
-		AllowHeaders:     []string{"*"},
-		AllowCredentials: true,
-		ExposeHeaders:    []string{"*"},
-	})(next)
+// recoverer is supposed to be called with a defer statement to recover a panic.
+func recoverer(w http.ResponseWriter, r *http.Request) {
+	// Recover the panic.
+	errAny := recover()
+	if errAny == nil {
+		return
+	}
+
+	slog.ErrorContext(r.Context(), "panic occurred during request execution: %v", errAny)
+	// Convert to error for handling.
+	err, ok := errAny.(error)
+	if !ok {
+		err = fmt.Errorf("unexpected error: %v", errAny)
+	}
+
+	// Response.
+	httputils.WriteErr(w, err)
 }
 
-// Secure defends against cross-site scripting (XSS) attack, content type sniffing, clickjacking,
-// insecure connection and other code injection attacks.
-func (m *Middleware) Secure(next echo.HandlerFunc) echo.HandlerFunc {
-	return middleware.Secure()(next)
+// CORS middlewares handled the CORS issues.
+func (m *Middleware) CORS(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "*")
+		w.Header().Set("Access-Control-Allow-Credentials", "*")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next(w, r)
+	}
 }

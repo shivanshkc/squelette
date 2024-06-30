@@ -8,12 +8,10 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 
 	"github.com/shivanshkc/squelette/pkg/logger"
 )
 
-//nolint:funlen // This function may get shorter when we write more tests in the future that demand re-usability.
 func TestAccessLogger(t *testing.T) {
 	// This test cannot run in parallel because it relies on the global logger object.
 
@@ -28,23 +26,16 @@ func TestAccessLogger(t *testing.T) {
 	// Mock HTTP request and response-writer.
 	req, res := httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder()
 
-	// Echo instance that uses the mock request and response writer.
-	echoInstance := echo.New()
-	eCtx := echoInstance.NewContext(req, res)
-
 	// Create an instance of access-logger middleware that passes control to a mock handler.
-	accessLoggerMW := mockMW.AccessLogger(func(c echo.Context) error {
-		return c.NoContent(expectedResponseStatus)
+	accessLoggerMW := mockMW.AccessLogger(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(expectedResponseStatus)
 	})
 
 	// Expect no error.
-	if err := accessLoggerMW(eCtx); err != nil {
-		t.Errorf("expected no error but got: %+v", err)
-		return
-	}
+	accessLoggerMW(res, req)
 
 	// Fetch context-info to verify if it was set correctly by the middleware.
-	ctxInfo := logger.GetContextValues(eCtx.Request().Context())
+	ctxInfo := logger.GetContextValues(req.Context())
 	// Verify if the request ID was initialized.
 	requestID, exists := ctxInfo["request_id"]
 	if !exists {

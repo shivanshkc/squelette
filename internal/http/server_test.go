@@ -17,7 +17,7 @@ import (
 func TestServer_Start(t *testing.T) {
 	// Start the server with mock dependencies.
 	server := mockServerStart()
-	defer func() { _ = server.echoInst.Close() }()
+	defer func() { _ = server.httpServer.Shutdown(context.Background()) }()
 
 	// Server dependencies.
 	cfg := config.LoadMock()
@@ -47,7 +47,7 @@ func TestServer_Start(t *testing.T) {
 func TestServer_Start_Interruption(t *testing.T) {
 	// Start the server with mock dependencies.
 	server := mockServerStart()
-	defer func() { _ = server.echoInst.Close() }()
+	defer func() { _ = server.httpServer.Shutdown(context.Background()) }()
 
 	// Send a SIGINT manually.
 	if err := syscall.Kill(syscall.Getpid(), syscall.SIGINT); err != nil {

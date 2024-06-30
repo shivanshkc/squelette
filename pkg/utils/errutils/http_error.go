@@ -2,9 +2,6 @@ package errutils
 
 import (
 	"errors"
-	"net/http"
-
-	"github.com/labstack/echo/v4"
 )
 
 // HTTPError is a custom error type that implements the error interface.
@@ -45,18 +42,11 @@ func ToHTTPError(err any) *HTTPError {
 	switch asserted := err.(type) {
 	case *HTTPError:
 		return asserted
-	case *echo.HTTPError:
-		return &HTTPError{
-			StatusCode: asserted.Code,
-			Status:     http.StatusText(asserted.Code),
-			Reason:     asserted.Error(),
-		}
+	case HTTPError:
+		return &asserted
 	case error:
 		if errHTTP := findErrorType[*HTTPError](asserted); errHTTP != nil {
 			return errHTTP.WithReasonErr(asserted)
-		}
-		if errEcho := findErrorType[*echo.HTTPError](asserted); errEcho != nil {
-			return ToHTTPError(errEcho).WithReasonStr(asserted.Error())
 		}
 		return InternalServerError().WithReasonErr(asserted)
 	case string:

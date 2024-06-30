@@ -8,9 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-
 	"github.com/shivanshkc/squelette/pkg/config"
 	"github.com/shivanshkc/squelette/pkg/logger"
 	"github.com/shivanshkc/squelette/pkg/utils/errutils"
@@ -25,18 +22,16 @@ func TestMiddleware_Recovery(t *testing.T) {
 
 	// This error should be present in the response.
 	expectedResponse := errutils.InternalServerError().WithReasonStr("test panic")
-	// Create a mock echo context for HTTP request execution.
+	// Create mock request and response.
 	recorder := httptest.NewRecorder()
-	mockEchoCtx := mockEchoContext(nil, recorder)
+	request := httptest.NewRequest(http.MethodGet, "/api", nil)
 
 	// Create an instance of the recovery MW that passes control to a mock handler.
-	recoveryMW := mockMW.Recovery(func(c echo.Context) error { panic(expectedResponse.Error()) })
+	recoveryMW := mockMW.Recovery(func(w http.ResponseWriter, r *http.Request) {
+		panic(expectedResponse)
+	})
 
-	// Expect no error.
-	if err := recoveryMW(mockEchoCtx); err != nil {
-		t.Errorf("expected no error but got: %v", err)
-		return
-	}
+	recoveryMW(recorder, request)
 
 	// Expect the correct status code.
 	if recorder.Code != expectedResponse.StatusCode {
@@ -76,55 +71,17 @@ func TestMiddleware_CORS(t *testing.T) {
 	// Recorder for verifying the response.
 	rec := httptest.NewRecorder()
 
-	// Create a mock echo context for HTTP request execution.
-	mockEchoCtx := mockEchoContext(req, rec)
-
 	// Create an instance of the CORS MW that passes control to a mock handler.
-	corsMW := mockMW.CORS(func(c echo.Context) error {
-		return c.NoContent(http.StatusOK)
+	corsMW := mockMW.CORS(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
 	})
 
-	// Expect no error.
-	if err := corsMW(mockEchoCtx); err != nil {
-		t.Errorf("expected no error but got: %v", err)
-		return
-	}
+	corsMW(rec, req)
 
 	// Check the value of the allow-origin header.
-	allowOriginHeader := rec.Header().Get(echo.HeaderAccessControlAllowOrigin)
+	allowOriginHeader := rec.Header().Get("Access-Control-Allow-Origin")
 	if allowOriginHeader != "*" {
 		t.Errorf("expected the allow origin header to be * but got: %s", allowOriginHeader)
-		return
-	}
-}
-
-func TestMiddleware_Secure(t *testing.T) {
-	t.Parallel()
-
-	// Create a middleware instance with a mock logger.
-	mockMW := middlewareWithMockLogger(io.Discard)
-
-	// Recorder for verifying the response.
-	rec := httptest.NewRecorder()
-	// Create a mock echo context for HTTP request execution.
-	mockEchoCtx := mockEchoContext(nil, rec)
-
-	// Create an instance of the CORS MW that passes control to a mock handler.
-	secureMW := mockMW.Secure(func(c echo.Context) error {
-		return c.NoContent(http.StatusOK)
-	})
-
-	// Expect no error.
-	if err := secureMW(mockEchoCtx); err != nil {
-		t.Errorf("expected no error but got: %v", err)
-		return
-	}
-
-	xssActual, xssExpected := rec.Header().Get(echo.HeaderXXSSProtection), middleware.DefaultSecureConfig.XSSProtection
-	// Check if the XSS-Protection header is set.
-	if xssActual != xssExpected {
-		t.Errorf("expected %s header value to be %s but got: %s",
-			echo.HeaderXXSSProtection, xssExpected, xssActual)
 		return
 	}
 }
@@ -136,27 +93,4 @@ func middlewareWithMockLogger(writer io.Writer) *Middleware {
 	conf := config.LoadMock()
 	logger.Init(writer, conf.Logger.Level, conf.Logger.Pretty)
 	return &Middleware{}
-}
-
-// mockEchoContext returns an echo context that uses a mock http request and response instance.
-// It also returns the *httptest.ResponseRecorder type as it cannot be obtained from the echo context.
-func mockEchoContext(req *http.Request, rec *httptest.ResponseRecorder) echo.Context {
-	// Use a simple request if provided is nil.
-	if req == nil {
-		req = httptest.NewRequest(http.MethodGet, "/", nil)
-	}
-	// Use a simple recorder if provided is nil.
-	if rec == nil {
-		rec = httptest.NewRecorder()
-	}
-
-	// Echo instance that uses the mock request and response writer.
-	echoInstance := echo.New()
-	// Add a custom HTTP error handler to the echo instance.
-	echoInstance.HTTPErrorHandler = func(err error, c echo.Context) {
-		errHTTP := errutils.ToHTTPError(err)
-		_ = c.JSON(errHTTP.StatusCode, errHTTP)
-	}
-	// This context is required by the middleware.
-	return echoInstance.NewContext(req, rec)
 }
