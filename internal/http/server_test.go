@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"syscall"
 	"testing"
@@ -78,14 +79,13 @@ func TestServer_Start_Interruption(t *testing.T) {
 // It sleeps for a second to give the server some time to boot up.
 func mockServerStart() *Server {
 	// Server dependencies.
-	cfg := config.LoadMock()
-	log := logger.New(cfg)
+	conf := config.LoadMock()
+	logger.Init(io.Discard, conf.Logger.Level, conf.Logger.Pretty)
 
 	// Instantiate the server to be tested.
 	server := &Server{
-		Config:     cfg,
-		Logger:     log,
-		Middleware: &Middleware{Logger: log},
+		Config:     conf,
+		Middleware: &Middleware{},
 	}
 
 	// Start the server without blocking.

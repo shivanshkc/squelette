@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -14,7 +15,6 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/shivanshkc/squelette/pkg/config"
-	"github.com/shivanshkc/squelette/pkg/logger"
 	"github.com/shivanshkc/squelette/pkg/utils/errutils"
 	"github.com/shivanshkc/squelette/pkg/utils/signals"
 )
@@ -22,7 +22,6 @@ import (
 // Server is the HTTP server of this application.
 type Server struct {
 	Config     *config.Config
-	Logger     *logger.Logger
 	Middleware *Middleware
 
 	echoInst *echo.Echo
@@ -52,17 +51,18 @@ func (s *Server) Start() {
 
 	// Gracefully shut down upon interruption.
 	signals.OnSignal(func(_ os.Signal) {
-		s.Logger.Info().Msg("interruption detected, gracefully shutting down the server")
+		slog.Info("interruption detected, gracefully shutting down the server")
 		// Graceful shutdown.
 		if err := server.Shutdown(context.Background()); err != nil {
-			s.Logger.Error().Err(fmt.Errorf("failed to gracefully shutdown the server: %w", err)).Send()
+			slog.Error("failed to gracefully shutdown the server", "err", err)
 		}
 	})
 
-	s.Logger.Info().Msg(fmt.Sprintf("http server running at: %s", s.Config.HTTPServer.Addr))
+	slog.Info("http server started", "name", s.Config.Application.Name, "addr", s.Config.HTTPServer.Addr)
 	// Start the HTTP server.
 	if err := s.echoInst.StartServer(server); !errors.Is(err, http.ErrServerClosed) {
-		s.Logger.Fatal().Err(fmt.Errorf("error in echoInstance.StartServer call: %w", err)).Send()
+		slog.Error("error in echoInstance.StartServer call", "err", err)
+		panic(err)
 	}
 }
 
@@ -76,10 +76,11 @@ func (s *Server) registerRoutes() {
 
 	// Sample REST method.
 	s.echoInst.GET("/api", func(c echo.Context) error {
-		s.Logger.WithContext(c.Request().Context()).Info().Msg("example log")
-		return c.JSON(http.StatusOK, map[string]any{"code": "OK"}) //nolint:wrapcheck
+		slog.InfoContext(c.Request().Context(), "example log")
+		return c.JSON(http.StatusOK, map[string]any{"code": "OK"})
 	})
 
+	fmt.Println(s.Config)
 	// Enable profiling if configured.
 	if s.Config.Application.PProf {
 		s.enableProfiling()
@@ -103,22 +104,23 @@ func (s *Server) enableProfiling() {
 
 	// Attach the multiplexer to echo.
 	s.echoInst.GET("/debug/pprof/*", echo.WrapHandler(mux))
-	s.Logger.Info().Msg("pprof endpoints available at: /debug/pprof")
+	slog.Info("pprof endpoints available at: /debug/pprof")
 }
 
 // errorHandler handles all echo HTTP errors.
 func (s *Server) errorHandler(err error, eCtx echo.Context) {
+	ctx := eCtx.Request().Context()
 	// Convert to HTTP error to send back the response.
 	errHTTP := errutils.ToHTTPError(err)
 
 	// Log HTTP errors.
 	switch errHTTP.StatusCode / 100 {
 	case 4: //nolint:gomnd // Represents 4xx behaviour.
-		s.Logger.Info().Any("error", errHTTP).Msg("bad request")
+		slog.InfoContext(ctx, "bad request", err, errHTTP)
 	case 5: //nolint:gomnd // Represents 5xx behaviour.
-		s.Logger.Error().Any("error", errHTTP).Msg("server error")
+		slog.ErrorContext(ctx, "internal error", err, errHTTP)
 	default:
-		s.Logger.Error().Any("error", errHTTP).Msg("unknown error")
+		slog.ErrorContext(ctx, "unexpected error", err, errHTTP)
 	}
 
 	// Response.

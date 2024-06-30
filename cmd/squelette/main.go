@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/shivanshkc/squelette/internal/http"
 	"github.com/shivanshkc/squelette/pkg/config"
 	"github.com/shivanshkc/squelette/pkg/logger"
@@ -8,14 +10,13 @@ import (
 
 func main() {
 	// Initialize basic dependencies.
-	cfg := config.Load()
-	log := logger.New(cfg)
+	conf := config.Load()
+	logger.Init(os.Stdout, conf.Logger.Level, conf.Logger.Pretty)
 
 	// Initialize the HTTP server.
-	server := http.Server{
-		Config:     cfg,
-		Logger:     log,
-		Middleware: &http.Middleware{Logger: log},
+	server := &http.Server{
+		Config:     conf,
+		Middleware: &http.Middleware{},
 	}
 
 	// This internally calls ListenAndServe.

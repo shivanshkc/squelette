@@ -16,7 +16,7 @@ build:
 	@go build -o bin/$(application_binary_name) cmd/$(application_name)/main.go
 
 # Runs the project after linting and building it anew.
-run: tidy lint build
+run: tidy build
 	@echo "+$@"
 	@echo "########### Running the application binary ############"
 	@bin/$(application_binary_name)

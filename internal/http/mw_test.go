@@ -81,7 +81,7 @@ func TestMiddleware_CORS(t *testing.T) {
 
 	// Create an instance of the CORS MW that passes control to a mock handler.
 	corsMW := mockMW.CORS(func(c echo.Context) error {
-		return c.NoContent(http.StatusOK) //nolint:wrapcheck
+		return c.NoContent(http.StatusOK)
 	})
 
 	// Expect no error.
@@ -111,7 +111,7 @@ func TestMiddleware_Secure(t *testing.T) {
 
 	// Create an instance of the CORS MW that passes control to a mock handler.
 	secureMW := mockMW.Secure(func(c echo.Context) error {
-		return c.NoContent(http.StatusOK) //nolint:wrapcheck
+		return c.NoContent(http.StatusOK)
 	})
 
 	// Expect no error.
@@ -133,14 +133,9 @@ func TestMiddleware_Secure(t *testing.T) {
 // The provided writer is used as the underlying io.Writer for the logger instance.
 func middlewareWithMockLogger(writer io.Writer) *Middleware {
 	// Setup basic dependencies.
-	cfg := config.LoadMock()
-	log := logger.New(cfg)
-
-	// Create a logger instance with the given writer.
-	*log.Logger = log.Logger.Output(writer)
-
-	// Instantiate the middleware struct for testing.
-	return &Middleware{Logger: log}
+	conf := config.LoadMock()
+	logger.Init(writer, conf.Logger.Level, conf.Logger.Pretty)
+	return &Middleware{}
 }
 
 // mockEchoContext returns an echo context that uses a mock http request and response instance.

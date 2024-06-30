@@ -1,16 +1,14 @@
 package http
 
 import (
+	"log/slog"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-
-	"github.com/shivanshkc/squelette/pkg/logger"
 )
 
 // Middleware implements all the REST middleware methods.
-type Middleware struct {
-	Logger *logger.Logger
-}
+type Middleware struct{}
 
 // Recovery is a panic recovery middleware.
 func (m *Middleware) Recovery(next echo.HandlerFunc) echo.HandlerFunc {
@@ -21,8 +19,7 @@ func (m *Middleware) Recovery(next echo.HandlerFunc) echo.HandlerFunc {
 		DisablePrintStack: false,
 		// This allows the usage of our custom logger.
 		LogErrorFunc: func(c echo.Context, err error, stack []byte) error {
-			log := m.Logger.WithContext(c.Request().Context())
-			log.Error().Err(err).Bytes("stack", stack).Msg("")
+			slog.ErrorContext(c.Request().Context(), "", "stack", stack)
 			return err
 		},
 	})(next)
