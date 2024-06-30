@@ -1,3 +1,23 @@
+# [1.1.0](https://github.com/shivanshkc/squelette/compare/v1.0.0...v1.1.0) (2024-06-30)
+
+
+### Bug Fixes
+
+* **ci:** add configs to dockerignore ([fd32f8a](https://github.com/shivanshkc/squelette/commit/fd32f8ad9aad5c791891987e48c043d6ed278edc))
+* **ci:** update actions ([ecdb7c4](https://github.com/shivanshkc/squelette/commit/ecdb7c4d296bb86c293070079cb1593e2ade9a26))
+* **core:** log statement correction ([6f848ce](https://github.com/shivanshkc/squelette/commit/6f848cecd98fd0e465732ac72ee37db1bdbc1c3a))
+* **core:** remove kevlar naming ([2f5702d](https://github.com/shivanshkc/squelette/commit/2f5702d7b1059789fa24231143a842a76c361e0f))
+* **core:** remove unnecessary error asserting function ([0650ff6](https://github.com/shivanshkc/squelette/commit/0650ff6e4858ecff64912c63c7039eceadf477e7))
+* **lint:** add godox linter ([ed0c88d](https://github.com/shivanshkc/squelette/commit/ed0c88df8b810bb7087891510b0533dc0417b54a))
+
+
+### Features
+
+* **core:** add profiling + refactoring ([3e7638e](https://github.com/shivanshkc/squelette/commit/3e7638ecbd8e48b001759ca40bf043ddf8dec3f4))
+* **core:** rename project to squelette ([10ad84a](https://github.com/shivanshkc/squelette/commit/10ad84a014efdb5f4112bcbf3aba8cd9f0899fbe))
+* **core:** replace echo with std lib, less strict linting ([b4eddbc](https://github.com/shivanshkc/squelette/commit/b4eddbc78831f035abddde857b4ddcd7d43a70b5))
+* **core:** replace zerolog with slog ([a25f8a0](https://github.com/shivanshkc/squelette/commit/a25f8a00fb694753cd2aad333057beb31385af90))
+
 # 1.0.0 (2023-05-08)
 
 
