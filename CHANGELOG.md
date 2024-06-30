@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/shivanshkc/squelette/compare/v1.1.1...v1.2.0) (2024-06-30)
+
+
+### Features
+
+* **core:** use gorilla mux instead of std lib mux ([05150a8](https://github.com/shivanshkc/squelette/commit/05150a8224cb91d43099288c14477a1050ff26fd))
+
 ## [1.1.1](https://github.com/shivanshkc/squelette/compare/v1.1.0...v1.1.1) (2024-06-30)
 
 
