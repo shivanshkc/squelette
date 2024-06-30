@@ -1,44 +1,34 @@
 package http
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/google/uuid"
 
-	"github.com/shivanshkc/template-microservice-go/pkg/utils/ctxutils"
+	"github.com/shivanshkc/squelette/pkg/logger"
 )
 
 // AccessLogger middleware handles access logging.
-func (m *Middleware) AccessLogger(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(eCtx echo.Context) error {
+func (m *Middleware) AccessLogger(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		// This will be used to calculate the total request execution time.
 		start := time.Now()
-		// Shorthand for the underlying request.
-		req := eCtx.Request()
 
-		// Setup the request's context.
-		ctxutils.SetRequestCtxInfo(req)
-		// Fetch the logger for the updated request context.
-		log := m.Logger.ForContext(req.Context())
+		newCtx := logger.AddContextValue(r.Context(), "request_id", uuid.NewString())
+		// Update the request with the new context.
+		*r = *r.WithContext(newCtx)
 
 		// Embedding the writer into the custom-writer to persist status-code for logging.
-		cWriter := &responseWriterWithCode{ResponseWriter: eCtx.Response()}
-		// Update the underlying response writer.
-		eCtx.SetResponse(echo.NewResponse(cWriter, eCtx.Echo()))
+		w = &responseWriterWithCode{ResponseWriter: w}
 
 		// Request entry log.
-		log.Info().Str("method", req.Method).Str("url", req.URL.String()).
-			Msg("request received")
-
+		slog.InfoContext(r.Context(), "request received", "url", r.URL.String())
 		// Release control to the next middleware or handler.
-		err := next(eCtx)
-
+		next(w, r)
 		// Request exit log.
-		log.Info().Int("code", cWriter.statusCode).Int64("latency", int64(time.Since(start))).
-			Msg("request completed")
-
-		return err
+		slog.InfoContext(r.Context(), "request completed", "latency", time.Since(start))
 	}
 }
 

@@ -1,5 +1,9 @@
 package errutils
 
+import (
+	"errors"
+)
+
 // HTTPError is a custom error type that implements the error interface.
 type HTTPError struct {
 	StatusCode int    `json:"-"`
@@ -34,13 +38,17 @@ func (h *HTTPError) WithReasonErr(reason error) *HTTPError {
 }
 
 // ToHTTPError converts any value to an appropriate HTTPError.
-func ToHTTPError(err interface{}) *HTTPError {
+func ToHTTPError(err any) *HTTPError {
 	switch asserted := err.(type) {
 	case *HTTPError:
 		return asserted
 	case HTTPError:
 		return &asserted
 	case error:
+		var errHTTP *HTTPError
+		if errors.As(asserted, &errHTTP) {
+			return errHTTP
+		}
 		return InternalServerError().WithReasonErr(asserted)
 	case string:
 		return InternalServerError().WithReasonStr(asserted)

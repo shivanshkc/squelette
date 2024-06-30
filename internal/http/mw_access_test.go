@@ -7,54 +7,44 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/google/uuid"
 
-	"github.com/shivanshkc/template-microservice-go/pkg/utils/ctxutils"
+	"github.com/shivanshkc/squelette/pkg/logger"
 )
 
-//nolint:funlen // This function may get shorter when we write more tests in the future that demand re-usability.
 func TestAccessLogger(t *testing.T) {
-	t.Parallel()
+	// This test cannot run in parallel because it relies on the global logger object.
 
 	// Create a middleware instance with a mock logger.
 	writer := &bytes.Buffer{}
 	mockMW := middlewareWithMockLogger(writer)
 
 	// Data to verify against.
-	expectedTraceID := "example-trace-id"
 	expectedResponseStatus := http.StatusBadRequest
 	expectedLogCount := 2
 
 	// Mock HTTP request and response-writer.
 	req, res := httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder()
-	req.Header.Set("x-trace-id", expectedTraceID)
-
-	// Echo instance that uses the mock request and response writer.
-	echoInstance := echo.New()
-	eCtx := echoInstance.NewContext(req, res)
 
 	// Create an instance of access-logger middleware that passes control to a mock handler.
-	accessLoggerMW := mockMW.AccessLogger(func(c echo.Context) error {
-		return c.NoContent(expectedResponseStatus) //nolint:wrapcheck
+	accessLoggerMW := mockMW.AccessLogger(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(expectedResponseStatus)
 	})
 
 	// Expect no error.
-	if err := accessLoggerMW(eCtx); err != nil {
-		t.Errorf("expected no error but got: %+v", err)
-		return
-	}
+	accessLoggerMW(res, req)
 
 	// Fetch context-info to verify if it was set correctly by the middleware.
-	ctxInfo := ctxutils.GetRequestCtxInfo(req.Context())
-
-	// Trace ID must be what's present in the request headers.
-	if ctxInfo.TraceID != expectedTraceID {
-		t.Errorf("expected trace ID to be: %s but got: %s", expectedTraceID, ctxInfo.TraceID)
+	ctxInfo := logger.GetContextValues(req.Context())
+	// Verify if the request ID was initialized.
+	requestID, exists := ctxInfo["request_id"]
+	if !exists {
+		t.Errorf("expected request ID to be present but it's not")
 		return
 	}
 
 	// Request ID must be initialized.
-	if ctxInfo.RequestID == "" {
+	if _, err := uuid.Parse(requestID.String()); err != nil {
 		t.Errorf("expected request ID to be initialized but got empty")
 		return
 	}

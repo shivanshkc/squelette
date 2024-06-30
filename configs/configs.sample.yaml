@@ -1,10 +1,11 @@
 ---
 application:
-  name: template-microservice-go
+  name: squelette
+  pprof: true
 
 http_server:
   addr: localhost:8080
 
 logger:
-  level: trace
+  level: debug
   pretty: true

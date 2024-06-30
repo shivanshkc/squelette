@@ -1,65 +1,46 @@
 package logger
 
 import (
-	"context"
 	"io"
-	"os"
-	"time"
-
-	"github.com/rs/zerolog"
-
-	"github.com/shivanshkc/template-microservice-go/pkg/config"
-	"github.com/shivanshkc/template-microservice-go/pkg/utils/ctxutils"
+	"log/slog"
+	"strings"
 )
 
-// Logger is a wrapper around zerolog.Logger to provide custom methods on it.
-type Logger struct {
-	*zerolog.Logger
+// Init creates a new slog logger and sets it as the default one.
+//
+// `level` should be one of "debug", "info", "warn" and "error".
+//
+// If `pretty` is true, logs will follow key=value format, otherwise JSON format.
+func Init(destination io.Writer, level string, pretty bool) {
+	var slogLevel slog.Level
 
-	Config *config.Config
-}
-
-// ForContext creates a new logger with this logger as the base.
-// The new logger by default logs the request metadata present in the given context.
-func (l *Logger) ForContext(ctx context.Context) *Logger {
-	// Get the loggable data out of the context.
-	ctxInfo := ctxutils.GetRequestCtxInfo(ctx)
-	if ctxInfo == nil {
-		return l
+	// Convert the given log-level to slog.Level case-insensitively.
+	switch strings.ToLower(level) {
+	case "debug":
+		slogLevel = slog.LevelDebug
+	case "info":
+		slogLevel = slog.LevelInfo
+	case "warn":
+		slogLevel = slog.LevelWarn
+	case "error":
+		slogLevel = slog.LevelError
+	default:
+		panic("unknown log level provided: " + level)
 	}
 
-	// Add the required fields to the subLogger.
-	subLogger := l.With().
-		Str("request_id", ctxInfo.RequestID).
-		Str("trace_id", ctxInfo.TraceID).
-		// More fields can be added here.
-		Logger()
+	options := &slog.HandlerOptions{
+		AddSource:   true,
+		Level:       slogLevel,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr { return a },
+	}
 
-	return &Logger{Logger: &subLogger}
-}
-
-// New creates a new Logger instance.
-func New(conf *config.Config) *Logger {
-	// Decide the formatting based on the config.
-	var logOutput io.Writer
-	if conf.Logger.Pretty {
-		logOutput = zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+	var handler slog.Handler
+	if pretty {
+		handler = slog.NewTextHandler(destination, options)
 	} else {
-		logOutput = os.Stdout
+		handler = slog.NewJSONHandler(destination, options)
 	}
 
-	// Determine the log level.
-	level, err := zerolog.ParseLevel(conf.Logger.Level)
-	if err != nil {
-		panic("unknown log level provided: " + conf.Logger.Level)
-	}
-
-	// Instantiate the logger.
-	zLogger := zerolog.New(logOutput).
-		Level(level).With().
-		Timestamp().
-		Caller().
-		Logger()
-
-	return &Logger{Logger: &zLogger, Config: conf}
+	handler = &ContextHandler{Handler: handler}
+	slog.SetDefault(slog.New(handler))
 }

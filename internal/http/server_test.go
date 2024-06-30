@@ -3,20 +3,21 @@ package http
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"syscall"
 	"testing"
 	"time"
 
-	"github.com/shivanshkc/template-microservice-go/pkg/config"
-	"github.com/shivanshkc/template-microservice-go/pkg/logger"
+	"github.com/shivanshkc/squelette/pkg/config"
+	"github.com/shivanshkc/squelette/pkg/logger"
 )
 
 // TestServer_Start checks if the HTTP server starts correctly with all the valid parameters.
 func TestServer_Start(t *testing.T) {
 	// Start the server with mock dependencies.
 	server := mockServerStart()
-	defer func() { _ = server.echoInstance.Close() }()
+	defer func() { _ = server.httpServer.Shutdown(context.Background()) }()
 
 	// Server dependencies.
 	cfg := config.LoadMock()
@@ -46,7 +47,7 @@ func TestServer_Start(t *testing.T) {
 func TestServer_Start_Interruption(t *testing.T) {
 	// Start the server with mock dependencies.
 	server := mockServerStart()
-	defer func() { _ = server.echoInstance.Close() }()
+	defer func() { _ = server.httpServer.Shutdown(context.Background()) }()
 
 	// Send a SIGINT manually.
 	if err := syscall.Kill(syscall.Getpid(), syscall.SIGINT); err != nil {
@@ -78,14 +79,13 @@ func TestServer_Start_Interruption(t *testing.T) {
 // It sleeps for a second to give the server some time to boot up.
 func mockServerStart() *Server {
 	// Server dependencies.
-	cfg := config.LoadMock()
-	log := logger.New(cfg)
+	conf := config.LoadMock()
+	logger.Init(io.Discard, conf.Logger.Level, conf.Logger.Pretty)
 
 	// Instantiate the server to be tested.
 	server := &Server{
-		Config:     cfg,
-		Logger:     log,
-		Middleware: &Middleware{Logger: log},
+		Config:     conf,
+		Middleware: &Middleware{},
 	}
 
 	// Start the server without blocking.
