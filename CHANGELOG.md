@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/shivanshkc/squelette/compare/v1.1.0...v1.1.1) (2024-06-30)
+
+
+### Bug Fixes
+
+* **docs:** update readme ([3ac61fc](https://github.com/shivanshkc/squelette/commit/3ac61fc080e1dac43e380bf6be96c54f4ea32dd0))
+
 # [1.1.0](https://github.com/shivanshkc/squelette/compare/v1.0.0...v1.1.0) (2024-06-30)
 
 
