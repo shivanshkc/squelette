@@ -45,30 +45,14 @@ func ToHTTPError(err any) *HTTPError {
 	case HTTPError:
 		return &asserted
 	case error:
-		if errHTTP := findErrorType[*HTTPError](asserted); errHTTP != nil {
-			return errHTTP.WithReasonErr(asserted)
+		var errHTTP *HTTPError
+		if errors.As(asserted, &errHTTP) {
+			return errHTTP
 		}
 		return InternalServerError().WithReasonErr(asserted)
 	case string:
 		return InternalServerError().WithReasonStr(asserted)
 	default:
 		return InternalServerError()
-	}
-}
-
-// findErrorType finds the T type in the wrap chain of the given error.
-//
-//nolint:errorlint // errors.As will not work here.
-func findErrorType[T any](err error) T {
-	switch asserted := err.(type) {
-	case T:
-		return asserted
-	default:
-		unwrapped := errors.Unwrap(err)
-		if unwrapped == nil {
-			var nilValue T
-			return nilValue
-		}
-		return findErrorType[T](unwrapped)
 	}
 }
