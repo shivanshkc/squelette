@@ -16,12 +16,14 @@ Squelette (french for Skeleton) is a quickstart template designed to simplify th
 
 3. Rename the `cmd/squelette` folder to your desired project name.
 
-4. Create a configs file by running:
+4. Delete the `CHANGELOG.md` file.
+
+5. Create a configs file by running:
     ```sh
     cp configs/configs.sample.yaml configs/configs.yaml
     ```
 
-5. Run using:
+6. Run using:
     ```sh
     make run
     ```

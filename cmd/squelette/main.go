@@ -16,7 +16,7 @@ func main() {
 	// Initialize the HTTP server.
 	server := &http.Server{
 		Config:     conf,
-		Middleware: &http.Middleware{},
+		Middleware: http.Middleware{},
 	}
 
 	// This internally calls ListenAndServe.

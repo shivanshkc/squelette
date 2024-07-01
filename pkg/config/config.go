@@ -26,13 +26,13 @@ type Config struct {
 }
 
 // Load loads and returns the config value.
-func Load() *Config {
+func Load() Config {
 	return loadWithViper()
 }
 
 // LoadMock provides a mock instance of the config for testing purposes.
-func LoadMock() *Config {
-	cfg := &Config{}
+func LoadMock() Config {
+	cfg := Config{}
 
 	cfg.Application.Name = "example-application"
 	cfg.HTTPServer.Addr = "localhost:8080"

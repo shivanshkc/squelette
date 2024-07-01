@@ -20,8 +20,8 @@ import (
 
 // Server is the HTTP server of this application.
 type Server struct {
-	Config     *config.Config
-	Middleware *Middleware
+	Config     config.Config
+	Middleware Middleware
 	httpServer *http.Server
 }
 
