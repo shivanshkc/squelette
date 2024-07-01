@@ -13,14 +13,15 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/shivanshkc/squelette/pkg/config"
+	"github.com/shivanshkc/squelette/pkg/utils/errutils"
 	"github.com/shivanshkc/squelette/pkg/utils/httputils"
 	"github.com/shivanshkc/squelette/pkg/utils/signals"
 )
 
 // Server is the HTTP server of this application.
 type Server struct {
-	Config     *config.Config
-	Middleware *Middleware
+	Config     config.Config
+	Middleware Middleware
 	httpServer *http.Server
 }
 
@@ -63,32 +64,41 @@ func (s *Server) getHandler() http.Handler {
 	router.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		slog.InfoContext(r.Context(), "hello world")
 		httputils.Write(w, http.StatusOK, nil, map[string]any{"code": "OK"})
-	})
+	}).Methods(http.MethodGet)
 
 	// More API routes here...
 
 	// Enable profiling if configured.
 	if s.Config.Application.PProf {
-		router.Handle("/", s.getProfilingHandler())
+		s.addProfilingRoutes(router)
 	}
+
+	// Handle 404.
+	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		httputils.WriteErr(w, errutils.NotFound())
+	})
 
 	return router
 }
 
-// getProfilingHandler returns the handler that serves profiling data.
-func (s *Server) getProfilingHandler() http.Handler {
+// addProfilingRoutes adds all the pprof routes to the router.
+func (s *Server) addProfilingRoutes(router *mux.Router) {
 	// Enable block profiling.
 	runtime.SetBlockProfileRate(1)
 	// Enable mutex profiling.
 	runtime.SetMutexProfileFraction(1)
 
-	router := mux.NewRouter()
-	router.HandleFunc("/debug/pprof/", pprof.Index)
+	// Manually add support for paths linked to by index page at /debug/pprof
+	router.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
+	router.Handle("/debug/pprof/heap", pprof.Handler("heap"))
+	router.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
+	router.Handle("/debug/pprof/block", pprof.Handler("block"))
+
 	router.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
 	router.HandleFunc("/debug/pprof/profile", pprof.Profile)
 	router.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
 	router.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	router.HandleFunc("/debug/pprof", pprof.Index)
 
 	slog.Info("pprof endpoints available at: /debug/pprof")
-	return router
 }
