@@ -1,3 +1,13 @@
+## [1.2.1](https://github.com/shivanshkc/squelette/compare/v1.2.0...v1.2.1) (2024-07-01)
+
+
+### Bug Fixes
+
+* **core:** add 404 handling ([433a7f1](https://github.com/shivanshkc/squelette/commit/433a7f1e048ad933a33e38ebd2cfb1b0ed4d6ea8))
+* **core:** fix pprof setup ([eddd4ef](https://github.com/shivanshkc/squelette/commit/eddd4ef8596beb743d334addf0a7aa9aa5f68802))
+* **core:** recovery mw prints stack ([43909e0](https://github.com/shivanshkc/squelette/commit/43909e08ae5eeb05d2e7f2247041b1625f6ddcc2))
+* **core:** remove unnecessary pointers ([51056cd](https://github.com/shivanshkc/squelette/commit/51056cdd0aeba0d1e5b69c550d49b440320ed144))
+
 # [1.2.0](https://github.com/shivanshkc/squelette/compare/v1.1.1...v1.2.0) (2024-06-30)
 
 
