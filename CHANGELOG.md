@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/shivanshkc/squelette/compare/v1.2.2...v1.2.3) (2024-07-02)
+
+
+### Bug Fixes
+
+* **ci:** Makefile supports both docker and podman ([0e14da3](https://github.com/shivanshkc/squelette/commit/0e14da33822df7ec40834fef8b9bc7cd5198677b))
+
 ## [1.2.2](https://github.com/shivanshkc/squelette/compare/v1.2.1...v1.2.2) (2024-07-02)
 
 
