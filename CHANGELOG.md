@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/shivanshkc/squelette/compare/v1.2.1...v1.2.2) (2024-07-02)
+
+
+### Bug Fixes
+
+* **ci:** fix deployment action and Containerfile go version ([ab573a8](https://github.com/shivanshkc/squelette/commit/ab573a87a1564fc934ae44dcd0188f27b31aff81))
+
 ## [1.2.1](https://github.com/shivanshkc/squelette/compare/v1.2.0...v1.2.1) (2024-07-01)
 
 
