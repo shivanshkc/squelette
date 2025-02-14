@@ -1,3 +1,12 @@
+## [1.2.4](https://github.com/shivanshkc/squelette/compare/v1.2.3...v1.2.4) (2025-02-14)
+
+
+### Bug Fixes
+
+* **ci:** update ci cd pipeline ([6170656](https://github.com/shivanshkc/squelette/commit/61706562eecd6ffb376851fa7b2eeee58d106944))
+* **core:** fix interruption handling bug ([4455125](https://github.com/shivanshkc/squelette/commit/4455125155f02c70f00b3ac92e0548544c42956d))
+* **core:** update to go 1.23 ([33e9a0d](https://github.com/shivanshkc/squelette/commit/33e9a0de46ac97f641f8037d85144ee92eccc482))
+
 ## [1.2.3](https://github.com/shivanshkc/squelette/compare/v1.2.2...v1.2.3) (2024-07-02)
 
 
