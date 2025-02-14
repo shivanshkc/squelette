@@ -7,7 +7,7 @@ import (
 	"github.com/shivanshkc/squelette/internal/config"
 	"github.com/shivanshkc/squelette/internal/http"
 	"github.com/shivanshkc/squelette/internal/logger"
-	"github.com/shivanshkc/squelette/internal/utils/signals"
+	"github.com/shivanshkc/squelette/pkg/signals"
 )
 
 func main() {
