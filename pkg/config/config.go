@@ -6,8 +6,6 @@ type Config struct {
 	Application struct {
 		// Name of the application.
 		Name string `yaml:"name"`
-		// PProf is a flag to enable/disable profiling.
-		PProf bool `yaml:"pprof"`
 	} `yaml:"application"`
 
 	// HTTPServer is the model of the HTTP Server configs.

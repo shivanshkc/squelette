@@ -5,9 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"net/http/pprof"
 	"os"
-	"runtime"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -68,37 +66,10 @@ func (s *Server) getHandler() http.Handler {
 
 	// More API routes here...
 
-	// Enable profiling if configured.
-	if s.Config.Application.PProf {
-		s.addProfilingRoutes(router)
-	}
-
 	// Handle 404.
 	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		httputils.WriteErr(w, errutils.NotFound())
 	})
 
 	return router
-}
-
-// addProfilingRoutes adds all the pprof routes to the router.
-func (s *Server) addProfilingRoutes(router *mux.Router) {
-	// Enable block profiling.
-	runtime.SetBlockProfileRate(1)
-	// Enable mutex profiling.
-	runtime.SetMutexProfileFraction(1)
-
-	// Manually add support for paths linked to by index page at /debug/pprof
-	router.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
-	router.Handle("/debug/pprof/heap", pprof.Handler("heap"))
-	router.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
-	router.Handle("/debug/pprof/block", pprof.Handler("block"))
-
-	router.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	router.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	router.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	router.HandleFunc("/debug/pprof/trace", pprof.Trace)
-	router.HandleFunc("/debug/pprof", pprof.Index)
-
-	slog.Info("pprof endpoints available at: /debug/pprof")
 }
