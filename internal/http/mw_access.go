@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/shivanshkc/squelette/pkg/logger"
+	"github.com/shivanshkc/squelette/internal/logger"
 )
 
 // AccessLogger middleware handles access logging.

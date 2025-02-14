@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
+	"github.com/shivanshkc/squelette/internal/config"
 	"github.com/shivanshkc/squelette/internal/http"
-	"github.com/shivanshkc/squelette/pkg/config"
-	"github.com/shivanshkc/squelette/pkg/logger"
+	"github.com/shivanshkc/squelette/internal/logger"
 )
 
 func main() {

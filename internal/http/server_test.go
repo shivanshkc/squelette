@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/shivanshkc/squelette/pkg/config"
-	"github.com/shivanshkc/squelette/pkg/logger"
+	"github.com/shivanshkc/squelette/internal/config"
+	"github.com/shivanshkc/squelette/internal/logger"
 )
 
 // TestServer_Start checks if the HTTP server starts correctly with all the valid parameters.

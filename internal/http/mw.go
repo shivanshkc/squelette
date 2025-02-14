@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/shivanshkc/squelette/pkg/utils/httputils"
+	"github.com/shivanshkc/squelette/internal/utils/httputils"
 )
 
 // hFunc is an alias for hFunc.

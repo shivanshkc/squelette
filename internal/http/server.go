@@ -10,10 +10,10 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/shivanshkc/squelette/pkg/config"
-	"github.com/shivanshkc/squelette/pkg/utils/errutils"
-	"github.com/shivanshkc/squelette/pkg/utils/httputils"
-	"github.com/shivanshkc/squelette/pkg/utils/signals"
+	"github.com/shivanshkc/squelette/internal/config"
+	"github.com/shivanshkc/squelette/internal/utils/errutils"
+	"github.com/shivanshkc/squelette/internal/utils/httputils"
+	"github.com/shivanshkc/squelette/internal/utils/signals"
 )
 
 // Server is the HTTP server of this application.

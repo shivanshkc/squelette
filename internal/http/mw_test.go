@@ -8,9 +8,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/shivanshkc/squelette/pkg/config"
-	"github.com/shivanshkc/squelette/pkg/logger"
-	"github.com/shivanshkc/squelette/pkg/utils/errutils"
+	"github.com/shivanshkc/squelette/internal/config"
+	"github.com/shivanshkc/squelette/internal/logger"
+	"github.com/shivanshkc/squelette/internal/utils/errutils"
 )
 
 func TestMiddleware_Recovery(t *testing.T) {

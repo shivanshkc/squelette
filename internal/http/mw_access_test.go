@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/shivanshkc/squelette/pkg/logger"
+	"github.com/shivanshkc/squelette/internal/logger"
 )
 
 func TestAccessLogger(t *testing.T) {
