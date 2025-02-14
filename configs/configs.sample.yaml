@@ -1,7 +1,6 @@
 ---
 application:
   name: squelette
-  pprof: true
 
 http_server:
   addr: localhost:8080
