@@ -3,9 +3,9 @@ package http
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -13,7 +13,6 @@ import (
 	"github.com/shivanshkc/squelette/internal/config"
 	"github.com/shivanshkc/squelette/internal/utils/errutils"
 	"github.com/shivanshkc/squelette/internal/utils/httputils"
-	"github.com/shivanshkc/squelette/internal/utils/signals"
 )
 
 // Server is the HTTP server of this application.
@@ -24,33 +23,34 @@ type Server struct {
 }
 
 // Start sets up all the dependencies and routes on the server, and calls ListenAndServe on it.
-func (s *Server) Start() {
+func (s *Server) Start() error {
+	addr := s.Config.HTTPServer.Addr
+
 	// Create the HTTP server.
-	s.httpServer = &http.Server{
-		Addr:              s.Config.HTTPServer.Addr,
-		ReadHeaderTimeout: time.Minute,
-		Handler:           s.getHandler(),
-	}
+	s.httpServer = &http.Server{Addr: addr, ReadHeaderTimeout: time.Minute, Handler: s.handler()}
 
-	// Gracefully shut down upon interruption.
-	signals.OnSignal(func(_ os.Signal) {
-		slog.Info("interruption detected, gracefully shutting down the server")
-		// Graceful shutdown.
-		if err := s.httpServer.Shutdown(context.Background()); err != nil {
-			slog.Error("failed to gracefully shutdown the server", "err", err)
-		}
-	})
-
-	slog.Info("starting http server", "name", s.Config.Application.Name, "addr", s.Config.HTTPServer.Addr)
+	slog.Info("Starting HTTP server", "name", s.Config.Application.Name, "addr", s.Config.HTTPServer.Addr)
 	// Start the HTTP server.
 	if err := s.httpServer.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-		slog.Error("error in ListenAndServe call", "err", err)
-		panic(err)
+		return fmt.Errorf("error in ListenAndServe call: %w", err)
+	}
+
+	return nil
+}
+
+// Shutdown initiates a graceful shutdown of the HTTP server.
+//
+// It does not return any errors, only logs them.
+func (s *Server) Shutdown() {
+	if err := s.httpServer.Shutdown(context.Background()); err != nil {
+		slog.Error("Error in Shutdown call", "err", err)
+	} else {
+		slog.Info("HTTP server shutdown successful")
 	}
 }
 
 // registerRoutes attaches middleware and REST methods to the server.
-func (s *Server) getHandler() http.Handler {
+func (s *Server) handler() http.Handler {
 	router := mux.NewRouter()
 
 	// Attach middleware.
@@ -60,8 +60,7 @@ func (s *Server) getHandler() http.Handler {
 
 	// Sample REST method.
 	router.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
-		slog.InfoContext(r.Context(), "hello world")
-		httputils.Write(w, http.StatusOK, nil, map[string]any{"code": "OK"})
+		httputils.Write(w, http.StatusNoContent, nil, nil)
 	}).Methods(http.MethodGet)
 
 	// More API routes here...
