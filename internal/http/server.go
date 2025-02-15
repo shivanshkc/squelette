@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/shivanshkc/squelette/internal/config"
+	"github.com/shivanshkc/squelette/internal/middleware"
 	"github.com/shivanshkc/squelette/internal/utils/errutils"
 	"github.com/shivanshkc/squelette/internal/utils/httputils"
 )
@@ -18,7 +19,7 @@ import (
 // Server is the HTTP server of this application.
 type Server struct {
 	Config     config.Config
-	Middleware Middleware
+	Middleware middleware.Middleware
 	httpServer *http.Server
 }
 

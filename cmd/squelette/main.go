@@ -7,6 +7,7 @@ import (
 	"github.com/shivanshkc/squelette/internal/config"
 	"github.com/shivanshkc/squelette/internal/http"
 	"github.com/shivanshkc/squelette/internal/logger"
+	"github.com/shivanshkc/squelette/internal/middleware"
 	"github.com/shivanshkc/squelette/pkg/signals"
 )
 
@@ -16,7 +17,7 @@ func main() {
 	logger.Init(os.Stdout, conf.Logger.Level, conf.Logger.Pretty)
 
 	// Initialize the HTTP server.
-	server := &http.Server{Config: conf, Middleware: http.Middleware{}}
+	server := &http.Server{Config: conf, Middleware: middleware.Middleware{}}
 
 	// Handle interruptions like SIGINT.
 	signals.OnSignal(func(_ os.Signal) {
