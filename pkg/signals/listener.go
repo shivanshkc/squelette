@@ -24,6 +24,8 @@ func Wait() {
 }
 
 // Manual trigger for action execution.
+//
+// Note that this will have no effect in case a signal has already been detected.
 func Manual() {
 	defaultListener.Manual()
 }
@@ -115,6 +117,8 @@ func (l *Listener) Wait() {
 }
 
 // Manual trigger for action execution.
+//
+// Note that this will have no effect in case a signal has already been detected.
 func (l *Listener) Manual() {
 	_ = syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 }
