@@ -23,16 +23,21 @@ func Wait() {
 	defaultListener.Wait()
 }
 
+// Manual trigger for action execution.
+func Manual() {
+	defaultListener.Manual()
+}
+
 // Listener listens to signals and allows actions to be called whenever a signal is received.
 type Listener struct {
 	// sigChan is where signals are originally received.
 	sigChan chan os.Signal
 	// actions is the list of actions to be called.
 	actions []func(os.Signal)
-	// actionsWaitChan receives an event as soon as all actions are done executing.
-	actionsWaitChan chan struct{}
 	// actionsMutex keeps the actions slice thread safe to use.
 	actionsMutex *sync.RWMutex
+	// actionsWaitChan receives an event as soon as all actions are done executing.
+	actionsWaitChan chan struct{}
 }
 
 // NewListener creates a new Listener instance with the given signals.
@@ -43,10 +48,10 @@ func NewListener(sigs ...os.Signal) *Listener {
 
 	// Instantiate the listener.
 	listener := &Listener{
-		sigChan:         make(chan os.Signal, 1),
+		sigChan:         make(chan os.Signal),
 		actions:         nil,
-		actionsWaitChan: make(chan struct{}, 1),
 		actionsMutex:    &sync.RWMutex{},
+		actionsWaitChan: make(chan struct{}),
 	}
 
 	// Listen to the required signals.
@@ -61,6 +66,8 @@ func NewListener(sigs ...os.Signal) *Listener {
 
 		// Block until a signal is detected.
 		<-listener.sigChan
+		// Signal has been detected. Stop listening for further signals.
+		signal.Stop(listener.sigChan)
 
 		// Read lock.
 		listener.actionsMutex.RLock()
@@ -105,4 +112,9 @@ func (l *Listener) Wait() {
 	<-l.actionsWaitChan
 	close(l.sigChan)
 	close(l.actionsWaitChan)
+}
+
+// Manual trigger for action execution.
+func (l *Listener) Manual() {
+	_ = syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 }

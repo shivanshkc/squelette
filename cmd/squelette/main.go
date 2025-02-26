@@ -28,6 +28,9 @@ func main() {
 
 	// Block until all actions are executed.
 	defer signals.Wait()
+	// Send a SIGINT manually when main returns for cleanup.
+	// This MUST run before signals.Wait and so it is deferred after it.
+	defer signals.Manual()
 
 	// This internally calls ListenAndServe.
 	// This is a blocking call and will panic if the server is unable to start.
