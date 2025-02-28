@@ -18,7 +18,7 @@ func TestOnSignal(t *testing.T) {
 		OnSignal(func(_ os.Signal) { actionChan <- struct{}{} })
 	}
 
-	// Send a SIGINT manually.
+	// Trigger actions manually.
 	Manual()
 	// Wait until all actions execute.
 	Wait()

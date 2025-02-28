@@ -50,7 +50,10 @@ func NewListener(sigs ...os.Signal) *Listener {
 
 	// Instantiate the listener.
 	listener := &Listener{
-		sigChan:         make(chan os.Signal),
+		// If the Manual method is called *after* an interruption is received, then sigChan may receive two elements.
+		// The first would be through signal.Notify and the second may be through the Manual method. In this case, the
+		// second element should be ignored and that's why sigChan has a length of 1, to accommodate the extra element.
+		sigChan:         make(chan os.Signal, 1),
 		actions:         nil,
 		actionsMutex:    &sync.RWMutex{},
 		actionsWaitChan: make(chan struct{}),
@@ -66,9 +69,9 @@ func NewListener(sigs ...os.Signal) *Listener {
 	go func() {
 		var sig os.Signal
 
-		// Block until a signal is detected.
+		// Wait for a signal.
 		<-listener.sigChan
-		// Signal has been detected. Stop listening for further signals.
+		// No need to listen for further signals.
 		signal.Stop(listener.sigChan)
 
 		// Read lock.
@@ -110,6 +113,8 @@ func (l *Listener) OnSignal(action func(os.Signal)) {
 }
 
 // Wait blocks until all actions have been executed.
+//
+// The listener instance is no longer usable once this method is called.
 func (l *Listener) Wait() {
 	<-l.actionsWaitChan
 	close(l.sigChan)
@@ -117,8 +122,9 @@ func (l *Listener) Wait() {
 }
 
 // Manual trigger for action execution.
+// This can be deferred in the main function to run cleanup actions even if no interruptions are detected.
 //
 // Note that this will have no effect in case a signal has already been detected.
 func (l *Listener) Manual() {
-	_ = syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+	l.sigChan <- syscall.SIGINT
 }
