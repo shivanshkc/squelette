@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log/slog"
 	"os"
 
 	"github.com/shivanshkc/squelette/internal/config"
@@ -25,13 +24,8 @@ func main() {
 
 	// Initialize the HTTP server.
 	server := &http.Server{Config: conf, Middleware: middleware.Middleware{}}
-
-	// Handle interruptions like SIGINT.
-	signals.OnSignal(func(_ os.Signal) {
-		slog.Info("Interruption detected, attempting graceful shutdown...")
-		// Execute all interruption handling here, like HTTP server shutdown, database connection closing etc.
-		server.Shutdown()
-	})
+	// Shutdown server upon interruption or exit.
+	signals.OnSignal(func(_ os.Signal) { server.Shutdown() })
 
 	// This internally calls ListenAndServe.
 	// This is a blocking call and will panic if the server is unable to start.
