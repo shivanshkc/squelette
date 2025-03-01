@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/shivanshkc/squelette/internal/config"
+	"github.com/shivanshkc/squelette/internal/handlers"
 	"github.com/shivanshkc/squelette/internal/http"
 	"github.com/shivanshkc/squelette/internal/logger"
 	"github.com/shivanshkc/squelette/internal/middleware"
@@ -23,7 +24,7 @@ func main() {
 	logger.Init(os.Stdout, conf.Logger.Level, conf.Logger.Pretty)
 
 	// Initialize the HTTP server.
-	server := &http.Server{Config: conf, Middleware: middleware.Middleware{}}
+	server := &http.Server{Config: conf, Middleware: middleware.Middleware{}, Handler: &handlers.Handler{}}
 	// Shutdown server upon interruption or exit.
 	signals.OnSignal(func(_ os.Signal) { server.Shutdown() })
 

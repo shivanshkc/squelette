@@ -11,15 +11,16 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/shivanshkc/squelette/internal/config"
+	"github.com/shivanshkc/squelette/internal/handlers"
 	"github.com/shivanshkc/squelette/internal/middleware"
-	"github.com/shivanshkc/squelette/internal/utils/errutils"
-	"github.com/shivanshkc/squelette/internal/utils/httputils"
 )
 
 // Server is the HTTP server of this application.
 type Server struct {
 	Config     config.Config
 	Middleware middleware.Middleware
+	Handler    *handlers.Handler
+
 	httpServer *http.Server
 }
 
@@ -67,16 +68,13 @@ func (s *Server) handler() http.Handler {
 	router.Use(s.Middleware.AccessLogger)
 
 	// Sample REST method.
-	router.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
-		httputils.Write(w, http.StatusNoContent, nil, nil)
-	}).Methods(http.MethodGet)
+	router.HandleFunc("/api", s.Handler.Health).Methods(http.MethodGet)
+	router.HandleFunc("/api/health", s.Handler.Health).Methods(http.MethodGet)
 
 	// More API routes here...
 
 	// Handle 404.
-	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		httputils.WriteErr(w, errutils.NotFound())
-	})
+	router.PathPrefix("/").HandlerFunc(s.Handler.NotFound)
 
 	return router
 }
