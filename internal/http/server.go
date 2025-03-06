@@ -11,14 +11,16 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/shivanshkc/squelette/internal/config"
-	"github.com/shivanshkc/squelette/internal/utils/errutils"
-	"github.com/shivanshkc/squelette/internal/utils/httputils"
+	"github.com/shivanshkc/squelette/internal/handlers"
+	"github.com/shivanshkc/squelette/internal/middleware"
 )
 
 // Server is the HTTP server of this application.
 type Server struct {
 	Config     config.Config
-	Middleware Middleware
+	Middleware middleware.Middleware
+	Handler    *handlers.Handler
+
 	httpServer *http.Server
 }
 
@@ -42,6 +44,13 @@ func (s *Server) Start() error {
 //
 // It does not return any errors, only logs them.
 func (s *Server) Shutdown() {
+	// In case the application initiates a shutdown before the server is even initialized.
+	// This may be because of a sudden SIGINT (ctrl+c).
+	if s.httpServer == nil {
+		slog.Info("HTTP server found nil")
+		return
+	}
+
 	if err := s.httpServer.Shutdown(context.Background()); err != nil {
 		slog.Error("Error in Shutdown call", "err", err)
 	} else {
@@ -59,16 +68,13 @@ func (s *Server) handler() http.Handler {
 	router.Use(s.Middleware.AccessLogger)
 
 	// Sample REST method.
-	router.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
-		httputils.Write(w, http.StatusNoContent, nil, nil)
-	}).Methods(http.MethodGet)
+	router.HandleFunc("/api", s.Handler.Health).Methods(http.MethodGet)
+	router.HandleFunc("/api/health", s.Handler.Health).Methods(http.MethodGet)
 
 	// More API routes here...
 
 	// Handle 404.
-	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		httputils.WriteErr(w, errutils.NotFound())
-	})
+	router.PathPrefix("/").HandlerFunc(s.Handler.NotFound)
 
 	return router
 }
