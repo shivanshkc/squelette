@@ -1,3 +1,18 @@
+# [1.3.0](https://github.com/shivanshkc/squelette/compare/v1.2.4...v1.3.0) (2025-03-06)
+
+
+### Bug Fixes
+
+* **ci:** containerization fixes, no host network usage ([32733a2](https://github.com/shivanshkc/squelette/commit/32733a2396e3e25d3b19369d9c79a1c6241e0943))
+* **ci:** interruption detection bug fix ([549dcdc](https://github.com/shivanshkc/squelette/commit/549dcdcd4d41547e8575b769cf912ffdafc666f4))
+* **ci:** signals package Manual method bug fix ([97e055c](https://github.com/shivanshkc/squelette/commit/97e055cfe2edb2429bb1bef66ce167f87668d239))
+* **ci:** update signals unit test to include Manual call ([c2bb457](https://github.com/shivanshkc/squelette/commit/c2bb457a0f917245c76aae6aa161288f92879c03))
+
+
+### Features
+
+* **core:** add handlers package ([e79ff31](https://github.com/shivanshkc/squelette/commit/e79ff31efa11cb21e49b60cdf796573c6f3b7241))
+
 ## [1.2.4](https://github.com/shivanshkc/squelette/compare/v1.2.3...v1.2.4) (2025-02-14)
 
 
