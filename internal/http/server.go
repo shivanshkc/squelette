@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/shivanshkc/squelette/internal/handlers"
 	"github.com/shivanshkc/squelette/internal/middleware"
 	"github.com/shivanshkc/squelette/internal/utils/errutils"
 	"github.com/shivanshkc/squelette/internal/utils/httputils"
@@ -15,6 +16,7 @@ import (
 
 // Server is the HTTP server of this application.
 type Server struct {
+	Handler    *handlers.Handler
 	httpServer *http.Server
 }
 

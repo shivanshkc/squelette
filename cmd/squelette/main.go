@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/shivanshkc/squelette/internal/config"
+	"github.com/shivanshkc/squelette/internal/handlers"
 	"github.com/shivanshkc/squelette/internal/http"
 	"github.com/shivanshkc/squelette/internal/logger"
 )
@@ -30,7 +31,7 @@ func main() {
 	logger.Init(os.Stdout, conf.Logger.Level, conf.Logger.Pretty)
 
 	// Initialize the HTTP server.
-	server := &http.Server{}
+	server := &http.Server{Handler: &handlers.Handler{}}
 
 	// Start the http server. The server will shut down when the context expires.
 	if err := server.Start(ctx, conf.HttpServer.Addr); err != nil {
