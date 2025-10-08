@@ -23,9 +23,7 @@ func (m Middleware) Recovery(next http.Handler) http.Handler {
 
 			// Stack for debugging.
 			stack := string(debug.Stack())
-			// Log.
-			slog.ErrorContext(r.Context(), "panic occurred during request execution",
-				"err", errAny, "stack", stack)
+			slog.ErrorContext(r.Context(), "panic during request execution", "err", errAny, "stack", stack)
 
 			// Convert to error for handling.
 			err, ok := errAny.(error)

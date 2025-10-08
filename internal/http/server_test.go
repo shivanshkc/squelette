@@ -10,7 +10,6 @@ import (
 
 	"github.com/shivanshkc/squelette/internal/config"
 	"github.com/shivanshkc/squelette/internal/logger"
-	"github.com/shivanshkc/squelette/internal/middleware"
 )
 
 // TestServer_Start checks if the HTTP server starts correctly with all the valid parameters.
@@ -51,13 +50,10 @@ func mockServerStart() *Server {
 	logger.Init(io.Discard, conf.Logger.Level, conf.Logger.Pretty)
 
 	// Instantiate the server to be tested.
-	server := &Server{
-		Config:     conf,
-		Middleware: middleware.Middleware{},
-	}
+	server := &Server{}
 
 	// Start the server without blocking.
-	go func() { _ = server.Start() }()
+	go func() { _ = server.Start(context.Background(), conf.HTTPServer.Addr) }()
 
 	// Wait for the server to start.
 	time.Sleep(time.Second)
