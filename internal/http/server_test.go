@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/shivanshkc/squelette/internal/config"
 	"github.com/shivanshkc/squelette/internal/logger"
 )
 
@@ -18,11 +17,8 @@ func TestServer_Start(t *testing.T) {
 	server := mockServerStart()
 	defer func() { _ = server.httpServer.Shutdown(context.Background()) }()
 
-	// Server dependencies.
-	cfg := config.LoadMock()
-
 	// Dummy request with a path that does not exist. We will expect 404.
-	reqURI := fmt.Sprintf("http://%s/not-existent-path", cfg.HTTPServer.Addr)
+	reqURI := fmt.Sprintf("http://%s/not-existent-path", "localhost:8080")
 	req, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, reqURI, nil)
 
 	// Execute request.
@@ -46,14 +42,13 @@ func TestServer_Start(t *testing.T) {
 // It sleeps for a second to give the server some time to boot up.
 func mockServerStart() *Server {
 	// Server dependencies.
-	conf := config.LoadMock()
-	logger.Init(io.Discard, conf.Logger.Level, conf.Logger.Pretty)
+	logger.Init(io.Discard, "info", true)
 
 	// Instantiate the server to be tested.
 	server := &Server{}
 
 	// Start the server without blocking.
-	go func() { _ = server.Start(context.Background(), conf.HTTPServer.Addr) }()
+	go func() { _ = server.Start(context.Background(), "localhost:8080") }()
 
 	// Wait for the server to start.
 	time.Sleep(time.Second)

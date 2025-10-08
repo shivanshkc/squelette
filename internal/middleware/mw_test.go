@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/shivanshkc/squelette/internal/config"
 	"github.com/shivanshkc/squelette/internal/logger"
 	"github.com/shivanshkc/squelette/internal/utils/errutils"
 )
@@ -90,7 +89,6 @@ func TestMiddleware_CORS(t *testing.T) {
 // The provided writer is used as the underlying io.Writer for the logger instance.
 func middlewareWithMockLogger(writer io.Writer) Middleware {
 	// Setup basic dependencies.
-	conf := config.LoadMock()
-	logger.Init(writer, conf.Logger.Level, conf.Logger.Pretty)
+	logger.Init(writer, "info", true)
 	return Middleware{}
 }

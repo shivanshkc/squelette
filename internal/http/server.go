@@ -27,14 +27,22 @@ func (s *Server) Start(ctx context.Context, addr string) error {
 		ReadHeaderTimeout: time.Minute,
 	}
 
+	// Channel to notify this thread of shut down completion.
+	shutdownCompleteChan := make(chan struct{})
+
 	// Cleanup goroutine.
 	go func() {
 		<-ctx.Done()
+
 		// Shutdown server when the context expires.
 		if err := s.httpServer.Shutdown(ctx); err != nil {
 			slog.Error("error while shutting down http server: " + err.Error())
 		}
 		slog.Info("http server shut down complete")
+
+		// Notify the main thread.
+		shutdownCompleteChan <- struct{}{}
+		close(shutdownCompleteChan)
 	}()
 
 	// Blocking call. Will release upon shut down (which happens upon context expiry).
@@ -43,6 +51,7 @@ func (s *Server) Start(ctx context.Context, addr string) error {
 		return fmt.Errorf("error in ListenAndServe call: %w", err)
 	}
 
+	<-shutdownCompleteChan
 	return nil
 }
 
