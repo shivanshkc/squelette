@@ -1,5 +1,5 @@
 #------------------------------------------------------------------
-FROM golang:1.23-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 # Update alpine.
 RUN apk update && apk upgrade
@@ -25,9 +25,9 @@ FROM alpine:3
 WORKDIR /service
 
 # Copy the files to the production image from the builder stage.
-COPY --from=builder /service/bin /service/
+COPY --from=builder /service/bin /service/bin
 
 # Run the web service on container startup.
-CMD ["/service/squelette"]
+CMD ["/service/bin/squelette"]
 
 #-------------------------------------------------------------------
