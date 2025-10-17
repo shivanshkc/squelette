@@ -31,10 +31,13 @@ func main() {
 	logger.Init(os.Stdout, conf.Logger.Level, conf.Logger.Pretty)
 
 	// Initialize the HTTP server.
-	server := &http.Server{Handler: &handlers.Handler{}}
+	server, err := http.NewServer(conf.HttpServer.Addr, &handlers.Handler{})
+	if err != nil {
+		panic("failed to create server: " + err.Error())
+	}
 
 	// Start the http server. The server will shut down when the context expires.
-	if err := server.Start(ctx, conf.HttpServer.Addr); err != nil {
+	if err := server.Start(ctx); err != nil {
 		panic("error in server.Start call: " + err.Error())
 	}
 }
