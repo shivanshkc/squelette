@@ -18,7 +18,7 @@ Squelette (French for "Skeleton") is a Go web service template that provides a c
 
 4. Delete the `CHANGELOG.md` file.
 
-5. Create a configs file by running:
+5. Create a config file by running:
     ```sh
     cp config/config.sample.json config/config.json
     ```

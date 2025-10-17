@@ -15,8 +15,8 @@ docs
 .idea
 .vscode
 
-# Configs
-configs
+# Config
+config
 
 # Logs
 logs

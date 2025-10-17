@@ -5,7 +5,7 @@ bin
 .idea
 .vscode
 
-# Configs
+# Config
 config/config.json
 
 # Profiling data
