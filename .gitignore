@@ -5,6 +5,10 @@ bin
 .idea
 .vscode
 
+# Generated data for tests
+tmp-*
+temp-*
+
 # Config
 config/config.json
 

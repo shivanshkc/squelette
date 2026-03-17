@@ -9,7 +9,10 @@ import (
 // Config encapsulates all config required by the application.
 type Config struct {
 	HttpServer struct {
-		Addr string `json:"addr"`
+		Addr           string   `json:"addr"`
+		AllowedOrigins []string `json:"allowedOrigins"`
+		// Read here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Max-Age
+		CorsMaxAgeSec int `json:"corsMaxAgeSec"`
 	} `json:"httpServer"`
 
 	Logger struct {

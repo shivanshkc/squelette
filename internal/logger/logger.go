@@ -20,7 +20,7 @@ func Init(destination io.Writer, level string, pretty bool) {
 		slogLevel = slog.LevelDebug
 	case "info":
 		slogLevel = slog.LevelInfo
-	case "warn":
+	case "warn", "warning":
 		slogLevel = slog.LevelWarn
 	case "error":
 		slogLevel = slog.LevelError
@@ -28,11 +28,8 @@ func Init(destination io.Writer, level string, pretty bool) {
 		panic("unknown log level provided: " + level)
 	}
 
-	options := &slog.HandlerOptions{
-		AddSource:   true,
-		Level:       slogLevel,
-		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr { return a },
-	}
+	// Set logger level.
+	options := &slog.HandlerOptions{AddSource: true, Level: slogLevel}
 
 	var handler slog.Handler
 	if pretty {
@@ -41,6 +38,6 @@ func Init(destination io.Writer, level string, pretty bool) {
 		handler = slog.NewJSONHandler(destination, options)
 	}
 
-	handler = &ContextHandler{Handler: handler}
+	handler = ContextHandler{Handler: handler}
 	slog.SetDefault(slog.New(handler))
 }

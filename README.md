@@ -2,7 +2,9 @@
 
 ## Introduction
 
-Squelette (French for "Skeleton") is a Go web service template that provides a clean, production-ready foundation for building HTTP APIs. It includes structured logging, middleware, error handling, and configuration management with minimal dependencies.
+Squelette (French for "Skeleton") is a Go web service template that provides a clean, production-ready foundation for
+building HTTP APIs. It includes structured logging, middleware, error handling, and configuration management with
+minimal dependencies.
 
 ## Getting Started
 
@@ -16,14 +18,12 @@ Squelette (French for "Skeleton") is a Go web service template that provides a c
 
 3. Rename the `cmd/squelette` folder to your desired project name.
 
-4. Delete the `CHANGELOG.md` file.
-
-5. Create a config file by running:
+4. Create a config file by running:
     ```sh
-    cp config/config.sample.json config/config.json
+    cp config/config.example.json config/config.json
     ```
 
-6. Run using:
+5. Run using:
     ```sh
     make run
     ```
@@ -33,82 +33,91 @@ Squelette (French for "Skeleton") is a Go web service template that provides a c
 The `Makefile` includes several commands to streamline common tasks:
 
 - `make build`: Build the project.
-- `make run`: Compile and run the project.
+- `make run`: Tidy dependencies, build, and run the project.
 - `make image`: Build the container image of the project.
 - `make container`: Run an application container.
 - `make test`: Run tests for the project.
 - `make lint`: Run linters to check code quality.
+- `make tidy`: Run `go mod tidy`.
 
 ## Adding an API
 
-### Quick Start
-New REST endpoints are added in the `mux()` method of the Server struct (`internal/http/server.go`). Here's a basic example:
+New REST endpoints are added in the `addRoutes()` method of the Handler struct (`internal/rest/rest.go`).
+Here's a basic example:
 
 ```go
-mux.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request) {
-    httputils.Write(w, http.StatusOK, nil, map[string]any{"users": []string{}})
+mux.HandleFunc("GET /api", func(w http.ResponseWriter, r *http.Request) {
+    httputils.WriteJson(w, http.StatusOK, nil, map[string]any{"code": "OK"})
 })
 ```
 
-### Project Structure
-The project follows a layered architecture:
+## Project Structure
 
 ```
+cmd/
+└── squelette/
+    └── main.go           # Entry point, HTTP server setup, graceful shutdown
+config/
+└── config.example.json   # Example configuration file
 internal/
-├── handlers/          # Business logic for API endpoints
-├── http/             # HTTP server setup and routing
-├── middleware/       # Request middleware (CORS, logging, recovery)
+├── config/               # Configuration loading
+├── logger/               # Structured logging with context support
+└── rest/                 # HTTP handler, routing, and middleware
+pkg/
 └── utils/
-    ├── httputils/    # HTTP response helpers
-    └── errutils/     # Error handling utilities
+    └── httputils/        # HTTP response helpers and error types
 ```
 
-### Adding Complex Handlers
+## Adding Complex Handlers
 
-For larger handlers, create methods on the `Handler` struct:
+For larger handlers, create methods on the `Handler` struct in `internal/rest/rest.go`:
 
-1. **Add to existing handler** (`internal/handlers/handler.go`):
+1. **Add a handler method**:
 ```go
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
     // Your business logic here
-    httputils.Write(w, http.StatusOK, nil, users)
+    httputils.WriteJson(w, http.StatusOK, nil, users)
 }
 ```
 
-2. **Register in mux** (`internal/http/server.go`):
+2. **Register in `addRoutes()`** (`internal/rest/rest.go`):
 ```go
-// The Server struct now has a Handler field
-mux.HandleFunc("/api/users", s.Handler.GetUsers)
+mux.HandleFunc("GET /api/users", h.GetUsers)
 ```
 
-3. **For new domains, create separate files**:
+3. **For new domains, create separate files** under `internal/rest/`:
 ```go
-// internal/handlers/user_handler.go
-type UserHandler struct{}
-
-func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) { ... }
-func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) { ... }
+// internal/rest/users.go
+func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) { ... }
+func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) { ... }
 ```
 
-### Error Handling
+## Error Handling
 
-Use the built-in error utilities for consistent responses:
+Use the built-in error utilities in `pkg/utils/httputils` for consistent responses:
 
 ```go
-// Return standard HTTP errors
-httputils.WriteErr(w, errutils.NotFound().WithReasonStr("User not found"))
-httputils.WriteErr(w, errutils.BadRequest().WithReasonStr("Invalid input"))
+httputils.WriteError(w, httputils.NotFound().WithReasonStr("User not found"))
+httputils.WriteError(w, httputils.BadRequest().WithReasonStr("Invalid input"))
 
-// Available error types: BadRequest, Unauthorized, Forbidden, NotFound, 
-// Conflict, InternalServerError, ServiceUnavailable
+// Available error types: BadRequest, Unauthorized, PaymentRequired, Forbidden,
+// NotFound, RequestTimeout, Conflict, PreconditionFailed, InternalServerError,
+// ServiceUnavailable
 ```
 
-### Adding Middleware
+## Middleware
 
-Create new middleware in `internal/middleware/mw.go`:
+Middleware is defined in `internal/rest/middleware.go`. The following middleware is applied by default (in `addMiddleware()`):
+
+- **Recovery**: Recovers from panics and returns a 500 response.
+- **Access Logger**: Logs incoming requests and outgoing responses with correlation IDs.
+- **CORS**: Handles cross-origin requests based on configured allowed origins.
+- **Body Size Limit**: Limits request body size (default 16 KB).
+
+To add new middleware, create a function in `internal/rest/middleware.go`:
 
 ```go
-func (m Middleware) Auth(next http.Handler) http.Handler {
+func authMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         // Authentication logic
         next.ServeHTTP(w, r)
@@ -116,20 +125,29 @@ func (m Middleware) Auth(next http.Handler) http.Handler {
 }
 ```
 
-Apply middleware in the `mux()` method:
+Then wire it into `addMiddleware()` in `internal/rest/rest.go`:
+
 ```go
-return mw.CORS(mw.Auth(mw.AccessLogger(mw.Recovery(mux))))
+func (h *Handler) addMiddleware(conf config.Config) {
+    next := bodySizeLimitMiddleware(h.underlying, maxBodyReadBytes)
+    next = corsMiddleware(next, conf.HttpServer.AllowedOrigins, conf.HttpServer.CorsMaxAgeSec)
+    next = accessLoggerMiddleware(next)
+    next = authMiddleware(next)
+    next = recoveryMiddleware(next)
+
+    h.underlying = next
+}
 ```
 
-### Response Helpers
+## Response Helpers
 
-Use `httputils.Write()` for consistent JSON responses:
+Use `httputils.WriteJson()` for consistent JSON responses:
 
 ```go
 // Success response
-httputils.Write(w, http.StatusOK, nil, data)
+httputils.WriteJson(w, http.StatusOK, nil, data)
 
 // With custom headers
 headers := map[string]string{"X-Total-Count": "100"}
-httputils.Write(w, http.StatusOK, headers, data)
+httputils.WriteJson(w, http.StatusOK, headers, data)
 ```
