@@ -15,37 +15,42 @@ type ContextHandler struct {
 	slog.Handler
 }
 
-// Handle adds the context values as attributes before calling the underlying handler.
-func (c *ContextHandler) Handle(ctx context.Context, r slog.Record) error {
+// Handle is supposed to be called by slog internally.
+func (c ContextHandler) Handle(ctx context.Context, r slog.Record) error {
 	if attrs, ok := ctx.Value(ctxKey).([]slog.Attr); ok {
-		for _, v := range attrs {
-			r.AddAttrs(v)
-		}
+		r.AddAttrs(attrs...)
 	}
 	return c.Handler.Handle(ctx, r)
 }
 
-// WithAttrs makes sure that ContextHandler is compatible with `slog.With` usage.
-func (c *ContextHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
-	underlyingHandler := c.Handler.WithAttrs(attrs)
-	return &ContextHandler{Handler: underlyingHandler}
+// WithAttrs is supposed to be called by slog internally.
+func (c ContextHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	return ContextHandler{Handler: c.Handler.WithAttrs(attrs)}
+}
+
+// WithGroup is supposed to be called by slog internally.
+func (c ContextHandler) WithGroup(name string) slog.Handler {
+	return ContextHandler{Handler: c.Handler.WithGroup(name)}
 }
 
 // AddContextValue returns a new context that includes the given value.
 //
 // Any slog statements logged using the returned context will log this value.
 func AddContextValue(parent context.Context, key string, value any) context.Context {
-	// Make slog.Attr from key-value.
-	attr := slog.Attr{Key: key, Value: slog.AnyValue(value)}
-
 	if parent == nil {
 		parent = context.Background()
 	}
 
+	// Make slog.Attr from key-value.
+	attr := slog.Any(key, value)
+
 	// The child context will have the parent's slog attributes too.
 	if v, ok := parent.Value(ctxKey).([]slog.Attr); ok {
-		v = append(v, attr)
-		return context.WithValue(parent, ctxKey, v)
+		// Copy before mutating, so the parent context remains unchanged.
+		vCopy := make([]slog.Attr, 0, len(v)+1)
+		vCopy = append(vCopy, v...)
+		vCopy = append(vCopy, attr)
+		return context.WithValue(parent, ctxKey, vCopy)
 	}
 
 	return context.WithValue(parent, ctxKey, []slog.Attr{attr})

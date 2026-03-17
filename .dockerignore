@@ -1,9 +1,6 @@
 # Compiled output
 bin
 
-# Documentation
-docs
-
 # Version control
 .git
 .gitignore
@@ -15,8 +12,11 @@ docs
 .idea
 .vscode
 
-# Configs
-configs
+# Config
+config
+
+# Profiling data
+pprof
 
 # Logs
 logs

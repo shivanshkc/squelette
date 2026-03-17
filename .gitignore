@@ -5,8 +5,12 @@ bin
 .idea
 .vscode
 
-# Configs
-configs/configs.yaml
+# Generated data for tests
+tmp-*
+temp-*
+
+# Config
+config/config.json
 
 # Profiling data
 pprof

@@ -1,12 +1,7 @@
 SHELL=/usr/bin/env bash
 
-# Project specific properties.
 application_name        = squelette
 application_binary_name = squelette
-
-# Container specific properties.
-application_image_name     = squelette
-application_container_name = squelette-1
 
 # Support both podman and docker.
 DOCKER=$(shell which podman || which docker || echo 'docker')
@@ -25,7 +20,7 @@ run: tidy build
 # Tests the whole project.
 test:
 	@echo "+$@"
-	@CGO_ENABLED=1 go test -race -coverprofile=coverage.out -covermode=atomic ./...
+	@go test -race -coverprofile=coverage.out -covermode=atomic ./...
 
 # Runs the "go mod tidy" command.
 tidy:
@@ -40,15 +35,15 @@ lint:
 # Builds the docker image for the project.
 image:
 	@echo "+$@"
-	@$(DOCKER) build --file Containerfile --tag $(application_image_name):latest .
+	@$(DOCKER) build --file Containerfile --tag $(application_name):latest .
 
 # Runs the project container assuming the image is already built.
 container:
 	@echo "+$@"
 	@echo "############### Removing old container ################"
-	@$(DOCKER) rm -f $(application_container_name)
+	@$(DOCKER) rm -f $(application_name)
 
 	@echo "################ Running new container ################"
-	@$(DOCKER) run --name $(application_container_name) --detach --publish 8080:8080 \
-		--volume $(PWD)/configs/configs.yaml:/etc/$(application_name)/configs.yaml \
-		$(application_image_name):latest
+	@$(DOCKER) run --name $(application_name) --detach --publish 8080:8080 \
+        --volume $(PWD)/config/config.json:/service/config/config.json \
+        $(application_name):latest

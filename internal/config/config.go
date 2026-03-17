@@ -1,42 +1,37 @@
 package config
 
-// Config represents the configs model.
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+)
+
+// Config encapsulates all config required by the application.
 type Config struct {
-	// Application is the model of application configs.
-	Application struct {
-		// Name of the application.
-		Name string `yaml:"name"`
-	} `yaml:"application"`
+	HttpServer struct {
+		Addr           string   `json:"addr"`
+		AllowedOrigins []string `json:"allowedOrigins"`
+		// Read here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Max-Age
+		CorsMaxAgeSec int `json:"corsMaxAgeSec"`
+	} `json:"httpServer"`
 
-	// HTTPServer is the model of the HTTP Server configs.
-	HTTPServer struct {
-		// Addr is the address of the HTTP server.
-		Addr string `yaml:"addr"`
-	} `yaml:"http_server"`
-
-	// Logger is the model of the application logger configs.
 	Logger struct {
-		// Level of the logger.
-		Level string `yaml:"level"`
-		// Pretty is a flag that dictates whether the log output should be pretty (human-readable).
-		Pretty bool `yaml:"pretty"`
-	} `yaml:"logger"`
+		Level  string `json:"level"`
+		Pretty bool   `json:"pretty"`
+	} `json:"logger"`
 }
 
-// Load loads and returns the config value.
-func Load() Config {
-	return loadWithViper()
-}
+// Load config from the given JSON file.
+func Load(jsonPath string) (Config, error) {
+	content, err := os.ReadFile(jsonPath)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to read config file at %s because: %w", jsonPath, err)
+	}
 
-// LoadMock provides a mock instance of the config for testing purposes.
-func LoadMock() Config {
-	cfg := Config{}
+	var config Config
+	if err := json.Unmarshal(content, &config); err != nil {
+		return Config{}, fmt.Errorf("failed to unmarshal config file at %s because: %w", jsonPath, err)
+	}
 
-	cfg.Application.Name = "example-application"
-	cfg.HTTPServer.Addr = "localhost:8080"
-
-	cfg.Logger.Level = "debug"
-	cfg.Logger.Pretty = true
-
-	return cfg
+	return config, nil
 }
