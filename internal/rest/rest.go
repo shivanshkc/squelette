@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/shivanshkc/squelette/internal/config"
-	"github.com/shivanshkc/squelette/pkg/utils/httputils"
+	"github.com/shivanshkc/squelette/pkg/httputils"
 )
 
 // maxBodyReadBytes is the max size that a request body is allowed to have.
