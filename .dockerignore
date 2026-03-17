@@ -12,7 +12,7 @@ bin
 .idea
 .vscode
 
-# Configs
+# Config
 config
 
 # Profiling data
