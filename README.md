@@ -42,6 +42,8 @@ The `Makefile` includes several commands to streamline common tasks:
 
 ## Adding an API
 
+### Quick Example
+
 New REST endpoints are added in the `addRoutes()` method of the Handler struct (`internal/rest/rest.go`).
 Here's a basic example:
 
@@ -51,24 +53,7 @@ mux.HandleFunc("GET /api", func(w http.ResponseWriter, r *http.Request) {
 })
 ```
 
-## Project Structure
-
-```
-cmd/
-└── squelette/
-    └── main.go           # Entry point, HTTP server setup, graceful shutdown
-config/
-└── config.example.json   # Example configuration file
-internal/
-├── config/               # Configuration loading
-├── logger/               # Structured logging with context support
-└── rest/                 # HTTP handler, routing, and middleware
-pkg/
-└── utils/
-    └── httputils/        # HTTP response helpers and error types
-```
-
-## Adding Complex Handlers
+### Practical Example
 
 For larger handlers, create methods on the `Handler` struct in `internal/rest/rest.go`:
 
@@ -92,9 +77,9 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) { ... }
 func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) { ... }
 ```
 
-## Error Handling
+### Error Handling
 
-Use the built-in error utilities in `pkg/utils/httputils` for consistent responses:
+Use the built-in error utilities in `pkg/httputils` for consistent responses:
 
 ```go
 httputils.WriteError(w, httputils.NotFound().WithReasonStr("User not found"))
@@ -103,6 +88,19 @@ httputils.WriteError(w, httputils.BadRequest().WithReasonStr("Invalid input"))
 // Available error types: BadRequest, Unauthorized, PaymentRequired, Forbidden,
 // NotFound, RequestTimeout, Conflict, PreconditionFailed, InternalServerError,
 // ServiceUnavailable
+```
+
+### Response Helpers
+
+Use `httputils.WriteJson()` for consistent JSON responses:
+
+```go
+// Success response
+httputils.WriteJson(w, http.StatusOK, nil, data)
+
+// With custom headers
+headers := map[string]string{"X-Total-Count": "100"}
+httputils.WriteJson(w, http.StatusOK, headers, data)
 ```
 
 ## Middleware
@@ -132,22 +130,25 @@ func (h *Handler) addMiddleware(conf config.Config) {
     next := bodySizeLimitMiddleware(h.underlying, maxBodyReadBytes)
     next = corsMiddleware(next, conf.HttpServer.AllowedOrigins, conf.HttpServer.CorsMaxAgeSec)
     next = accessLoggerMiddleware(next)
-    next = authMiddleware(next)
-    next = recoveryMiddleware(next)
+    next = authMiddleware(next) // <- Added at the 2nd position.
+    next = recoveryMiddleware(next) // <- This executes first.
 
     h.underlying = next
 }
 ```
 
-## Response Helpers
+## Project Structure
 
-Use `httputils.WriteJson()` for consistent JSON responses:
-
-```go
-// Success response
-httputils.WriteJson(w, http.StatusOK, nil, data)
-
-// With custom headers
-headers := map[string]string{"X-Total-Count": "100"}
-httputils.WriteJson(w, http.StatusOK, headers, data)
+```
+cmd/
+└── squelette/
+    └── main.go           # Entry point, HTTP server setup, graceful shutdown
+config/
+└── config.example.json   # Example configuration file
+internal/
+├── config/               # Configuration loading
+├── logger/               # Structured logging with context support
+└── rest/                 # HTTP handler, routing, and middleware
+pkg/
+└── httputils/            # HTTP response helpers and error types
 ```

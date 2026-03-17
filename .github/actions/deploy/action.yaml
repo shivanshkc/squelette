@@ -95,7 +95,6 @@ runs:
           --restart unless-stopped \
           --network ${{ inputs.network_name }} \
           --volume ~/services/${{ inputs.service_name }}/config/config.json:/service/config/config.json:ro \
-          --volume ~/services/${{ inputs.service_name }}/secrets:/service/secrets \
           ${{ inputs.service_name }}:latest
 
         # Clean up temporary files

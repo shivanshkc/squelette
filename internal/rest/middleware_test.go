@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/shivanshkc/squelette/internal/logger"
-	"github.com/shivanshkc/squelette/pkg/utils/httputils"
+	"github.com/shivanshkc/squelette/pkg/httputils"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"

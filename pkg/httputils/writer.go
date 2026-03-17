@@ -34,14 +34,6 @@ func (r *ResponseWriterWithCode) Flush() {
 	}
 }
 
-// Push forwards http.Pusher when supported (HTTP/2 server push).
-func (r *ResponseWriterWithCode) Push(target string, opts *http.PushOptions) error {
-	if p, ok := r.ResponseWriter.(http.Pusher); ok {
-		return p.Push(target, opts)
-	}
-	return http.ErrNotSupported
-}
-
 // Hijack method belongs to the http.Hijacker interface. It is necessary when working with websockets.
 func (r *ResponseWriterWithCode) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	// Get the underlying hijacker interface.
