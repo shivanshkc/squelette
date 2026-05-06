@@ -33,5 +33,28 @@ func Load(jsonPath string) (Config, error) {
 		return Config{}, fmt.Errorf("failed to unmarshal config file at %s because: %w", jsonPath, err)
 	}
 
+	if err := validate(config); err != nil {
+		return Config{}, fmt.Errorf("config is invalid: %w", err)
+	}
+
 	return config, nil
+}
+
+// validate the loaded config.
+func validate(conf Config) error {
+	if conf.HttpServer.Addr == "" {
+		return fmt.Errorf("http server address is required")
+	}
+	if len(conf.HttpServer.AllowedOrigins) == 0 {
+		return fmt.Errorf("http server allowed origins are required")
+	}
+	if conf.HttpServer.CorsMaxAgeSec == 0 {
+		return fmt.Errorf("http server cors max age is required")
+	}
+
+	if conf.Logger.Level == "" {
+		return fmt.Errorf("logger level is required")
+	}
+
+	return nil
 }
