@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/shivanshkc/squelette/compare/v2.0.0...v2.1.0) (2026-05-18)
+
+
+### Features
+
+* config validation ([cdb11ec](https://github.com/shivanshkc/squelette/commit/cdb11ece3930b559c30c787c1f173797e90f00ec))
+
 # [2.0.0](https://github.com/shivanshkc/squelette/compare/v1.3.0...v2.0.0) (2026-03-17)
 
 
