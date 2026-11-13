@@ -41,6 +41,6 @@ func Init(destination io.Writer, level string, pretty bool) {
 		handler = slog.NewJSONHandler(destination, options)
 	}
 
-	handler = &ContextHandler{Handler: handler}
+	handler = ContextHandler{Handler: handler}
 	slog.SetDefault(slog.New(handler))
 }
