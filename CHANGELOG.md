@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/shivanshkc/squelette/compare/v2.1.0...v2.1.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* **logger:** prevent context slice mutation and complete slog.Handler interface ([2af65ce](https://github.com/shivanshkc/squelette/commit/2af65ce579e6cc1a06e3e33e6e5b179eb54ab559))
+
 # [2.1.0](https://github.com/shivanshkc/squelette/compare/v2.0.0...v2.1.0) (2026-05-18)
 
 
